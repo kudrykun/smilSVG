@@ -27,12 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     editorscene.cpp \
-    sidebar.cpp
+    editorview.cpp \
+    svgdocument.cpp \
+    grabbingcorner.cpp
 
 HEADERS += \
         mainwindow.h \
     editorscene.h \
-    sidebar.h
+    editorview.h \
+    svgdocument.h \
+    grabbingcorner.h
 
 FORMS += \
         mainwindow.ui

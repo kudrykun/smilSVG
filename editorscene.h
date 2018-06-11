@@ -3,55 +3,34 @@
 
 #include <QObject>
 #include <QGraphicsScene>
-#include <QGraphicsItem>
+#include <QGraphicsRectItem>
+#include "svgdocument.h"
 
 class EditorScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    enum Mode {Pointer, RectItem, EllipseItem, LineItem};
-    enum KeyMode {None, Shift};
+    enum Mode {Pointer, RectItem, EllipseItem, LineItem}; // выборы инструмента
+    enum KeyMode {None, Shift}; //модификатор инструмента
     EditorScene(QObject *parent = 0);
+    void setCurrentScale(qreal scale);
 
 public slots:
-    void setMode(int mode) {currentMode = static_cast<Mode>(mode);} //установка текущего режима
-
-    void setWidth(QString text);
-    void setHeight(int num);
-
-    void setX(int num);
-    void setY(int num);
-
+    void setMode(int mode) {currentMode = static_cast<Mode>(mode);} //установка инструмента
+    void updateScale(qreal scale);
+protected:
+    //переопределнный метод, используемый для отрисовки сетки
+    void drawBackground(QPainter *painter, const QRectF &rect);
 signals:
-    void widthChanged(int num);
-    void heightChanged(int num);
-    void xChanged(int num);
-    void yChanged(int num);
-
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
-
-protected:
-    void drawRect(QRect rect);
-    void drawEllipse(QRect rect);
-    void drawLine(QRect rect);
-
-    void selectItem(QGraphicsItem *item);
+    void updateDocumentScale(qreal scale);
 
 private:
-    Mode currentMode;
-    KeyMode currentKeyMode;
-    QColor currentItemColor;
-    QGraphicsItem *temp_item = 0;
-    QGraphicsItem *selectedItem = 0;
-    int sx = 0;
-    int sy = 0;
-    int cx = 0;
-    int cy = 0;
+    Mode currentMode; //текущий инструмент
+    KeyMode currentKeyMode; //текущий модификатор
+
+    SvgDocument *document;
+    QColor sceneColor = QColor(228,228,228);
+    qreal current_scale;
 };
 
 #endif // EDITORSCENE_H
