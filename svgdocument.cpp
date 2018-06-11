@@ -57,7 +57,7 @@ void SvgDocument::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     QRectF tempRect = rect();
     QRectF tempTempRect = tempRect;
 
-    float minSize = 100;
+    float minSize = 10;
 
     switch(owner->getCornerType()){
     case Top: {
@@ -152,8 +152,32 @@ void SvgDocument::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 }
 
 //=========================================================================================================
+void SvgDocument::mousePressEvent(QGraphicsSceneMouseEvent *ev)
+{
+    if(ev->button() == Qt::LeftButton)
+    {
+        previous_pos = ev->pos();
+        this->setCursor(Qt::SizeAllCursor);
+    }
+    QGraphicsItem::mousePressEvent(ev);
+}
+
+//=========================================================================================================
+void SvgDocument::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)
+{
+    if(ev->button() == Qt::LeftButton)
+    {
+        qDebug() << "SvgDocument::mouseReleaseEvent";
+        this->setCursor(Qt::ArrowCursor);
+    }
+    QGraphicsItem::mouseReleaseEvent(ev);
+}
+
+//=========================================================================================================
 void SvgDocument::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
+    auto d = ev->pos() - previous_pos;
+    this->moveBy(d.x(), d.y());
     QGraphicsItem::mouseMoveEvent(ev);
 }
 

@@ -3,10 +3,10 @@
 
 #include <QObject>
 #include <QGraphicsRectItem>
-#include <QGraphicsSceneMouseEvent>
 #include <QPen>
 #include <QBrush>
 #include "grabbingcorner.h"
+#include <QGraphicsSceneMouseEvent>
 
 /*
  * Этот класс реализует площадь для манипуляцией свг элементами, который будет транслирован в xml разметку
@@ -36,7 +36,9 @@ public slots:
     void cornerMove(GrabbingCorner *owner, qreal dx, qreal dy);
 
 protected:
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *ev);
+    void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *ev) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *ev) override;
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
@@ -51,9 +53,11 @@ private:
     QPen docPen = QPen(QColor(160,160,160));
 
     bool selected = true;
+    bool space_pressed = false;
     float cornerRad = 4;
     GrabbingCorner* grabbingCorners[8];
     unsigned int current_corner;
+    QPointF previous_pos;
 };
 
 #endif // SVGDOCUMENT_H

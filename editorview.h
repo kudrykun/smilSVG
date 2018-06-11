@@ -30,7 +30,8 @@ protected:
 private:
     qreal current_scale = 1;
     bool space_pressed = false;
-    QPointF start;
+    bool lmb_pressed = false;
+    QPointF previous_mouse_pos;
 };
 
 #endif // EDITORVIEW_H

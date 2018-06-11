@@ -38,34 +38,48 @@ void EditorView::wheelEvent(QWheelEvent *ev)
 //=========================================================================================================
 void EditorView::mousePressEvent(QMouseEvent *ev)
 {
-    if(space_pressed){
-        start = ev->pos();
-
+    if(ev->button() == Qt::LeftButton)
+    {
+        lmb_pressed = true;
+        previous_mouse_pos = ev->pos();
     }
-
-    QGraphicsView::mousePressEvent(ev);
+    if(space_pressed && lmb_pressed)
+    {
+        QApplication::restoreOverrideCursor();
+        QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+    }
+    if(!space_pressed)
+        QGraphicsView::mousePressEvent(ev);
 }
 
 //=========================================================================================================
 void EditorView::mouseMoveEvent(QMouseEvent *ev)
 {
-    if(space_pressed){
-        QPointF end = ev->pos();
-        QPointF tr = end - start;
-        start = end;
-
+    if(space_pressed && lmb_pressed){
+        auto tr = ev->pos() - previous_mouse_pos;
         this->horizontalScrollBar()->setValue( this->horizontalScrollBar()->value() - tr.x());
         this->verticalScrollBar()->setValue(  this->verticalScrollBar()->value() - tr.y());
-
-
     }
-    QGraphicsView::mouseMoveEvent(ev);
+    previous_mouse_pos = ev->pos();
+    if(!space_pressed)
+        QGraphicsView::mouseMoveEvent(ev);
 }
 
 //=========================================================================================================
 void EditorView::mouseReleaseEvent(QMouseEvent *ev)
 {
-    QGraphicsView::mouseReleaseEvent(ev);
+    if(ev->button() == Qt::LeftButton)
+    {
+        lmb_pressed = false;
+    }
+
+    if(!lmb_pressed && space_pressed)
+    {
+        QApplication::restoreOverrideCursor();
+        QApplication::setOverrideCursor(Qt::OpenHandCursor);
+    }
+    if(!space_pressed)
+        QGraphicsView::mouseReleaseEvent(ev);
 }
 
 //=========================================================================================================
@@ -73,7 +87,11 @@ void EditorView::keyPressEvent(QKeyEvent *ev)
 {
     switch(ev->key()){
         case Qt::Key_Space:
-            space_pressed = true;
+            if(!ev->isAutoRepeat()){
+                space_pressed = true;
+                QApplication::restoreOverrideCursor();
+                QApplication::setOverrideCursor(Qt::OpenHandCursor);
+            }
             break;
         default:
             QGraphicsView::keyPressEvent(ev);
@@ -85,7 +103,10 @@ void EditorView::keyReleaseEvent(QKeyEvent *ev)
 {
     switch(ev->key()){
         case Qt::Key_Space:
-            space_pressed = false;
+            if(!ev->isAutoRepeat()){
+                space_pressed = false;
+                QApplication::restoreOverrideCursor();
+            }
             break;
         default:
             QGraphicsView::keyReleaseEvent(ev);
