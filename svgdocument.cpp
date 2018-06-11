@@ -12,7 +12,6 @@ SvgDocument::SvgDocument(const QRectF &rect) : QGraphicsRectItem(rect)
     setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
-    qDebug() << this->boundingRect();
 }
 
 //=========================================================================================================
@@ -51,123 +50,122 @@ void SvgDocument::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 void SvgDocument::setScaleFactor(qreal factor)
 {
     cornerRad /= factor;
-    qDebug() << "СЛОТ В СЛОТЕ БРАТАН " << cornerRad;
 }
 
 void SvgDocument::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 {
-    qDebug() << "MOVE CORNER!";
-    switch(owner->getCornerType())
-    {
+    QRectF tempRect = rect();
+    QRectF tempTempRect = tempRect;
+
+    float minSize = 100;
+
+    switch(owner->getCornerType()){
     case Top: {
-        qDebug() << "MOVE TOP";
-        QRectF tempRect = rect();
-        tempRect.setTop(tempRect.top()+dy);
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
+        tempTempRect.setTop(tempTempRect.top()+dy);
         break;
     }
     case Bottom: {
-        qDebug() << " MOVE Bottom";
-        QRectF tempRect = rect();
-        tempRect.setBottom(tempRect.bottom()+dy);
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
+        tempTempRect.setBottom(tempTempRect.bottom()+dy);
         break;
     }
     case Right: {
-        qDebug() << "MOVE Right";
-        QRectF tempRect = rect();
-        tempRect.setRight(tempRect.right()+dx);
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
+        tempTempRect.setRight(tempTempRect.right()+dx);
         break;
     }
     case Left: {
-        qDebug() << "MOVE Left";
-        QRectF tempRect = rect();
-        qDebug() << "RECT POS " << tempRect.x() << " " << tempRect.y();
-        tempRect.setLeft(tempRect.left()+dx);
-        qDebug() << "RECT POS " << tempRect.x() << " " << tempRect.y();
-        //tempRect.translate(-dx , 0 );
-        //tempRect.translate(rect().width() - tempRect.width(),0);
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
-        qDebug() << "RECT POS " << tempRect.x() << " " << tempRect.y();
+        tempTempRect.setLeft(tempTempRect.left()+dx);
         break;
     }
     case TopLeft: {
-        qDebug() << "MOVE TopLeft";
-        QRectF tempRect = rect();
-        //tempRect.setLeft(tempRect.left()+dx);
-        //tempRect.setTop(tempRect.top()+dy);
-        tempRect.setTopLeft(QPointF(tempRect.left()+dx,tempRect.top()+dy));
-        //tempRect.translate(dx , 0 );
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
+        tempTempRect.setTopLeft(QPointF(tempTempRect.left()+dx,tempTempRect.top()+dy));
         break;
     }
     case BottomRight:{
-        qDebug() << "MOVE BottomRight";
-        QRectF tempRect = rect();
-        //tempRect.setRight(tempRect.right()+dx);
-        //tempRect.setBottom(tempRect.bottom()+dy);
-        tempRect.setBottomRight(QPointF(tempRect.right()+dx,tempRect.bottom()+dy));
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
+        tempTempRect.setBottomRight(QPointF(tempTempRect.right()+dx,tempTempRect.bottom()+dy));
         break;
     }
     case TopRight:{
-        qDebug() << "MOVE TopRight";
-        QRectF tempRect = rect();
-        //tempRect.setRight(tempRect.right()+dx);
-        //tempRect.setTop(tempRect.top()+dy);
-        tempRect.setTopRight(QPointF(tempRect.right()+dx,tempRect.top()+dy));
-        prepareGeometryChange();
-        setRect( tempRect );
-        update();
+        tempTempRect.setTopRight(QPointF(tempTempRect.right()+dx,tempTempRect.top()+dy));
         break;
     }
-    case BottomLeft:
-        qDebug() << "MOVE BottomLeft";
-        QRectF tempRect = rect();
-        //tempRect.setLeft(tempRect.left()+dx);
-        //tempRect.setBottom(tempRect.bottom()+dy);
-        tempRect.setBottomLeft(QPointF(tempRect.left()+dx,tempRect.bottom()+dy));
-        //tempRect.translate(dx , 0 );
-        prepareGeometryChange();
-        setRect( tempRect );
-        //rect().
-        update();
+    case BottomLeft: {
+        tempTempRect.setBottomLeft(QPointF(tempTempRect.left()+dx,tempTempRect.bottom()+dy));
         break;
     }
+}
+    switch(owner->getCornerType())
+{
+    case Top: {
+        if(tempTempRect.height() >= minSize)
+            tempRect.setTop(tempRect.top()+dy);
+        break;
+    }
+    case Bottom: {
+        if(tempTempRect.height() >= minSize)
+            tempRect.setBottom(tempRect.bottom()+dy);
+        break;
+    }
+    case Right: {
+        if(tempTempRect.width() >= minSize)
+            tempRect.setRight(tempRect.right()+dx);
+        break;
+    }
+    case Left: {
+        if(tempTempRect.width() >= minSize)
+            tempRect.setLeft(tempRect.left()+dx);
+        break;
+    }
+    case TopLeft: {
+        if(tempTempRect.height() >= minSize)
+            tempRect.setTop(tempRect.top()+dy);
+        if(tempTempRect.width() >= minSize)
+            tempRect.setLeft(tempRect.left()+dx);
+        break;
+    }
+    case BottomRight:{
+        if(tempTempRect.height() >= minSize)
+            tempRect.setBottom(tempRect.bottom()+dy);
+        if(tempTempRect.width() >= minSize)
+            tempRect.setRight(tempRect.right()+dx);
+        break;
+    }
+    case TopRight:{
+        if(tempTempRect.height() >= minSize)
+            tempRect.setTop(tempRect.top()+dy);
+        if(tempTempRect.width() >= minSize)
+            tempRect.setRight(tempRect.right()+dx);
+        break;
+    }
+    case BottomLeft: {
+        if(tempTempRect.height() >= minSize)
+            tempRect.setBottom(tempRect.bottom()+dy);
+        if(tempTempRect.width() >= minSize)
+            tempRect.setLeft(tempRect.left()+dx);
+        break;
+    }
+}
+
+    prepareGeometryChange();
+    setRect( tempRect );
+    update();
     updateCornersPosition();
 }
 
 //=========================================================================================================
 void SvgDocument::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
-    //qDebug() << "MOVE CORNER";
     QGraphicsItem::mouseMoveEvent(ev);
 }
 
 //=========================================================================================================
 void SvgDocument::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    qDebug() << "hoverEnter";
     QGraphicsItem::hoverEnterEvent(event);
 }
 
 //=========================================================================================================
 void SvgDocument::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    qDebug() << "hoverLeave";
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
@@ -182,75 +180,10 @@ void SvgDocument::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
     qreal dby = pt.y() - rect().bottom();   // Distance between the mouse and the botto
 
     current_corner = 0;
-    //if( dby < 7 && dby > -7 ) current_corner |= Top;       // Top side
-    //if( dty < 7 && dty > -7 ) current_corner |= Bottom;    // Bottom side
-    //if( drx < 7 && drx > -7 ) current_corner |= Right;     // Right side
-    //if( dlx < 7 && dlx > -7 ) current_corner |= Left;      // Left side
-
-    //if((qAbs(dlx)/2 < 8 || qAbs(drx)/2 < 8) && qAbs(dty) < 8) current_corner = Top;
-    ///if(qAbs(drx) < 8 && (qAbs(dby)/2 < 8 || qAbs(dty)/2 < 8)) current_corner = Right;
-    //if((qAbs(dlx)/2 < 8 || qAbs(drx)/2 < 8) && qAbs(dby) < 8) current_corner = Bottom;
-    //if(qAbs(dlx) < 8 && (qAbs(dby)/2 < 8 || qAbs(dty)/2 < 8)) current_corner = Left;
-
-    //if(pt.x() < rect().topRight().x()+4 &&
-            //pt.x() > rect().topRight().x()-4 &&
-           // pt.y() < rect().topRight().y()+4 &&
-            //pt.y() > rect().topRight().y()-4) current_corner = TopRight;
-
     if( dby < 8 && dby > -8 && (dlx >= rect().width()/2-8 && dlx <= rect().width()/2+8)) current_corner |= Bottom;       // Top side
     if( dty < 4 && dty > -4 ) current_corner |= Top;    // Bottom side
     if( drx < 4 && drx > -4 ) current_corner |= Right;     // Right side
     if( dlx < 4 && dlx > -4 ) current_corner |= Left;      // Left side
-
-    qDebug() << rect().width()/2;
-
-    //if(qAbs(dlx) < 8 && qAbs(dby) < 8) current_corner = TopLeft;
-    //if(qAbs(drx) < 8 && qAbs(dby) < 8) current_corner = TopRight;
-    //if(qAbs(drx) < 8 && qAbs(dby) < 8) current_corner = BottomRight;
-    //if(qAbs(dlx) < 8 && qAbs(dby) < 8) current_corner = BottomLeft;
-
-
-    /*switch(current_corner)
-    {
-    case Top:
-        qDebug() << "TOP";
-        this->setCursor(Qt::SizeVerCursor);
-        break;
-    case Bottom:
-        qDebug() << "Bottom";
-        this->setCursor(Qt::SizeVerCursor);
-        break;
-    case Right:
-        qDebug() << "Right";
-        this->setCursor(Qt::SizeHorCursor);
-        break;
-    case Left:
-        qDebug() << "Left";
-        this->setCursor(Qt::SizeHorCursor);
-        break;
-    case TopLeft:
-        qDebug() << "TopLeft";
-        this->setCursor(Qt::SizeFDiagCursor);
-        break;
-    case BottomRight:
-        qDebug() << "BottomRight";
-        this->setCursor(Qt::SizeFDiagCursor);
-        break;
-    case TopRight:
-        qDebug() << "TopRight";
-        this->setCursor(Qt::SizeBDiagCursor);
-        break;
-    case BottomLeft:
-        qDebug() << "BottomLeft";
-        this->setCursor(Qt::SizeBDiagCursor);
-        break;
-    default:
-        qDebug() << "None";
-        this->setCursor(Qt::ArrowCursor);
-        break;
-
-    }*/
-
     QGraphicsItem::hoverMoveEvent(event);
 }
 

@@ -21,6 +21,8 @@ public:
     };
     GrabbingCorner(QPointF pos, CornerType type, QGraphicsItem *paremtItem = nullptr, QObject *parent = nullptr);
     unsigned int getCornerType(){return corner_type;}
+    QPointF getPreviousPos() const;
+    void setPreviousPos(const QPointF pos);
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *ev) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override ;
@@ -31,9 +33,6 @@ protected:
 signals:
     void signalMove(GrabbingCorner *owner, qreal dx, qreal dy);
 
-private:
-    QPointF getPreviousPos() const;
-    void setPreviousPos(const QPointF pos);
 private:
     QColor strokeColor = QColor(21,146,230);
     QColor fillColor = QColor(255, 255, 255);

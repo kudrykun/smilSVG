@@ -27,53 +27,9 @@ void GrabbingCorner::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 //=========================================================================================================
 void GrabbingCorner::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
-
-    qDebug() << "MOVE EVENT";
-    qDebug() << "curr " << ev->scenePos() << " prev " << previous_pos;
-    auto dx = ev->scenePos().x() - previous_pos.x();
-    auto dy = ev->scenePos().y() - previous_pos.y();
-
-    switch(corner_type)
-    {
-    case Top:
-        qDebug() << "TOP";
-        dx = 0;
-        moveBy(dx,dy);
-        break;
-    case Bottom:
-        qDebug() << "Bottom";
-        dx = 0;
-        moveBy(dx,dy);
-        break;
-    case Right:
-        qDebug() << "Right";
-        dy = 0;
-        moveBy(dx,0);
-        break;
-    case Left:
-        qDebug() << "Left";
-        dy = 0;
-        moveBy(dx,0);
-        break;
-    case TopLeft:
-        qDebug() << "TopLeft";
-        moveBy(dx,dy);
-        break;
-    case BottomRight:
-        qDebug() << "BottomRight";
-        moveBy(dx,dy);
-        break;
-    case TopRight:
-        qDebug() << "TopRight";
-        moveBy(dx,dy);
-        break;
-    case BottomLeft:
-        qDebug() << "BottomLeft";
-        moveBy(dx,dy);
-        break;
-    }
+    auto dx = ev->pos().x();
+    auto dy = ev->pos().y();
     setPreviousPos(ev->scenePos());
-
     emit signalMove(this,dx,dy);
 }
 
@@ -98,42 +54,33 @@ void GrabbingCorner::setPreviousPos(const QPointF pos)
 //=========================================================================================================
 void GrabbingCorner::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    qDebug() << "grabber hover enter";
     Q_UNUSED(event);
     this->setBrush(filHoverColor);
 
     switch(corner_type)
     {
     case Top:
-        qDebug() << "TOP";
         this->setCursor(Qt::SizeVerCursor);
         break;
     case Bottom:
-        qDebug() << "Bottom";
         this->setCursor(Qt::SizeVerCursor);
         break;
     case Right:
-        qDebug() << "Right";
         this->setCursor(Qt::SizeHorCursor);
         break;
     case Left:
-        qDebug() << "Left";
         this->setCursor(Qt::SizeHorCursor);
         break;
     case TopLeft:
-        qDebug() << "TopLeft";
         this->setCursor(Qt::SizeFDiagCursor);
         break;
     case BottomRight:
-        qDebug() << "BottomRight";
         this->setCursor(Qt::SizeFDiagCursor);
         break;
     case TopRight:
-        qDebug() << "TopRight";
         this->setCursor(Qt::SizeBDiagCursor);
         break;
     case BottomLeft:
-        qDebug() << "BottomLeft";
         this->setCursor(Qt::SizeBDiagCursor);
         break;
     }
@@ -142,7 +89,6 @@ void GrabbingCorner::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 //=========================================================================================================
 void GrabbingCorner::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    qDebug() << "grabber hover leave";
     Q_UNUSED(event);
     this->setBrush(fillColor);
     parentItem()->setCursor(Qt::ArrowCursor);
