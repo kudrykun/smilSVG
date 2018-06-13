@@ -29,14 +29,18 @@ SOURCES += \
     editorscene.cpp \
     editorview.cpp \
     svgdocument.cpp \
-    grabbingcorner.cpp
+    grabbingcorner.cpp \
+    rectitem.cpp \
+    ellipseitem.cpp
 
 HEADERS += \
         mainwindow.h \
     editorscene.h \
     editorview.h \
     svgdocument.h \
-    grabbingcorner.h
+    grabbingcorner.h \
+    rectitem.h \
+    ellipseitem.h
 
 FORMS += \
         mainwindow.ui

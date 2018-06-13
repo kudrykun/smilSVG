@@ -3,21 +3,29 @@
 #include <QDebug>
 #include <QPainter>
 #include "document.h"
+#include "rectitem.h"
+#include "ellipseitem.h"
+
 
 
 //=========================================================================================================
 EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
 {
-    currentMode = RectItem;
+    currentMode = Rect;
     currentKeyMode = None;
     current_scale = 1;
     setSceneRect(0,0,2000,2000);
 
     document = new SvgDocument(QRectF(650,650,700,700));
 
+    RectItem *rect = new RectItem(QRectF(300,300,400,400));
+    EllipseItem *ellipse = new EllipseItem(QRectF(700,300,400,400));
+
     connect(this, SIGNAL(updateDocumentScale(qreal)), document, SLOT(setScaleFactor(qreal)));
 
     this->addItem(document);
+    this->addItem(rect);
+    this->addItem(ellipse);
 }
 
 //=========================================================================================================

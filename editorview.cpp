@@ -18,6 +18,7 @@ void EditorView::wheelEvent(QWheelEvent *ev)
 
     //скейлим только если нажат ctrl
     if( QApplication::keyboardModifiers() && Qt::ControlModifier){
+        setTransformationAnchor(QGraphicsView::AnchorUnderMouse); //для зума под положение курсора
         if(ev->angleDelta().y() > 0){
             current_scale *= 1.05;
             this->scale(1.05, 1.05);

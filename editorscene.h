@@ -10,7 +10,7 @@ class EditorScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    enum Mode {Pointer, RectItem, EllipseItem, LineItem}; // выборы инструмента
+    enum Mode {Pointer, Rect, Ellipse, Line}; // выборы инструмента
     enum KeyMode {None, Shift}; //модификатор инструмента
     EditorScene(QObject *parent = 0);
     void setCurrentScale(qreal scale);
