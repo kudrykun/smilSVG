@@ -9,18 +9,10 @@
 #include "grabbingcorner.h"
 #include <QGraphicsSceneMouseEvent>
 
-/*
- * Этот класс реализует площадь для манипуляцией свг элементами, который будет транслирован в xml разметку
-*/
 class RectItem : public  QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    RectItem(const QRectF &rect);
-    QRectF boundingRect() const;
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
     enum Corners{
         Top = 0,
         Bottom = 1,
@@ -31,6 +23,16 @@ public:
         BottomLeft = 6,
         BottomRight = 7
     };
+
+public:
+    RectItem(const QRectF &rect);
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    void setPen(const QPen &pen);
+    void setBrush(const QBrush &brush);
+    QPen getPen();
+    QBrush getBrush();
 
 public slots:
     void setScaleFactor(qreal factor);
@@ -45,20 +47,26 @@ protected:
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
-    void drawGripCorners(QPainter *painter, const QRectF &rect);
-    void attachGrabbers(const QRectF &rect);
+    void attachGrabbers();
+    void removeGrabbers();
     void updateCornersPosition();
+    QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
 
 private:
     QBrush docBrush = QBrush(QColor(255,255,255));
-    QPen docPen = QPen(QColor(160,160,160));
+    QPen docPen = QPen(QColor(160,160,160), 20);
+    QBrush currentBrush = QBrush(QColor(255,255,255));
+    QPen currentPen = QPen(QColor(120,120,120,140), 20, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
 
-    bool selected = true;
-    bool space_pressed = false;
     float cornerRad = 4;
     GrabbingCorner* grabbingCorners[8];
     unsigned int current_corner;
     QPointF previous_pos;
+
+    bool debug_mode = false;
+
+    float rx = 40;
+    float ry = 20;
 };
 
 #endif // RECTITEM_H

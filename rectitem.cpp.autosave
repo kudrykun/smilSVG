@@ -44,10 +44,13 @@ void RectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     QPainterPath painterPath;
     re.adjust(-currentPen.width()/2, -currentPen.width()/2, currentPen.width()/2, currentPen.width()/2);
-    if(rx != 0 || ry != 0)
+    if(rx != 0 || ry != 0){
+        re.adjust(-currentPen.width()/2, -currentPen.width()/2, currentPen.width()/2, currentPen.width()/2);
         painterPath.addRoundedRect(re,rx*(re.width()/rect().width()),ry*(re.height()/rect().height()));
-    else
+    }
+    else{
         painterPath.addRect(re);
+    }
 
     QPainterPathStroker stroker;
     //stroker.setCapStyle(Qt::FlatCap);
