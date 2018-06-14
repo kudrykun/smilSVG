@@ -1,5 +1,6 @@
 #include "ellipseitem.h"
 
+#include <QApplication>
 #include <QDebug>
 #include <QPainter>
 #include <QCursor>
@@ -7,9 +8,9 @@
 //=========================================================================================================
 EllipseItem::EllipseItem(const QRectF &rect) : QGraphicsEllipseItem(rect)
 {
-    setPen(docPen);
-    setBrush(docBrush);
-    //attachGrabbers(rect);
+    setRect(rect);
+    setPen(currentPen);
+    setBrush(currentBrush);
     setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
@@ -18,14 +19,11 @@ EllipseItem::EllipseItem(const QRectF &rect) : QGraphicsEllipseItem(rect)
 //=========================================================================================================
 QRectF EllipseItem::boundingRect() const
 {
-    QRectF rect = QGraphicsEllipseItem::boundingRect();
-
-    //если элемент выбран, то добавятся углы и размер rect увеличиваем и смещаем его
+    QRectF rect = this->rect();
+    rect.adjust(-currentPen.width(),-currentPen.width(),currentPen.width(),currentPen.width());
+    qDebug() << rect;
     if(isSelected()){
-        rect.setX(rect.x() - cornerRad);
-        rect.setY(rect.y() - cornerRad);
-        rect.setWidth(rect.width()+2*cornerRad);
-        rect.setHeight(rect.height()+2*cornerRad);
+        rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
     }
     return rect;
 }
@@ -33,24 +31,60 @@ QRectF EllipseItem::boundingRect() const
 //=========================================================================================================
 void EllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QRectF re = QGraphicsEllipseItem::boundingRect();
+    QRectF re = this->rect();
 
-    // если элемент выбран, то меняем цвет его границы
-    if(isSelected()){
-        painter->setPen(QPen(QColor(21,146,230)));
-    }
-    else{
-        painter->setPen(this->pen());
-    }
-
-    painter->setBrush(this->brush());
+    painter->setBrush(currentBrush);
+    painter->setPen(QPen(Qt::NoPen));
     painter->drawEllipse(re);
+
+    QPainterPath painterPath;
+    re.adjust(-currentPen.width()/2, -currentPen.width()/2, currentPen.width()/2, currentPen.width()/2);
+    painterPath.addEllipse(re);
+    QPainterPathStroker stroker;
+    stroker.createStroke(painterPath);
+
+    painter->strokePath(painterPath, currentPen);
     if(isSelected())
     {
         painter->setPen(QPen(QColor(21,146,230)));
         painter->setBrush(QBrush(QColor(0,0,0,0)));
-        painter->drawRect(re);
+        auto rect = boundingRect();
+        rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+        painter->drawRect(rect);
     }
+
+    if(debug_mode)
+    {
+        painter->setBrush(QBrush(Qt::transparent));
+        painter->setPen(QPen(Qt::red));
+        painter->drawRect(rect());
+
+        painter->setBrush(QBrush(Qt::transparent));
+        painter->setPen(QPen(Qt::blue));
+        painter->drawRect(boundingRect());
+    }
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+}
+
+void EllipseItem::setPen(const QPen &pen)
+{
+    currentPen = pen;
+}
+
+void EllipseItem::setBrush(const QBrush &brush)
+{
+    currentBrush = brush;
+}
+
+QPen EllipseItem::getPen()
+{
+    return currentPen;
+}
+
+QBrush EllipseItem::getBrush()
+{
+    return currentBrush;
 }
 
 //=========================================================================================================
@@ -59,12 +93,34 @@ void EllipseItem::setScaleFactor(qreal factor)
     cornerRad /= factor;
 }
 
+//=========================================================================================================
 void EllipseItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 {
     QRectF tempRect = rect();
     QRectF tempTempRect = tempRect;
 
     float minSize = 10;
+
+//    if( QApplication::keyboardModifiers() && Qt::ControlModifier){
+//        auto corner_type = owner->getCornerType();
+//        if(corner_type == TopLeft || corner_type == TopRight || corner_type == BottomLeft || corner_type == BottomRight)
+//        {
+//            bool x_sign = dx >= 0;
+//            bool y_sign = dy >= 0;
+//            auto dc = qMax(qAbs(dx), qAbs(dy));
+//            dx = x_sign ? dc : -dc;
+//            dy = y_sign ? dc : -dc;
+//            qDebug() << dx << " " << dy;
+//            auto max_size = qMax(tempRect.width(), tempRect.height());
+//            auto x = tempRect.x();
+//            auto y = tempRect.y();
+//            //tempRect.setWidth(max_size);
+//            //tempRect.setHeight(max_size);
+//            tempRect.setSize(QSizeF(max_size, max_size));
+//            //tempRect.setX(x);
+//            //tempRect.setY(y);
+//        }
+//    }
 
     switch(owner->getCornerType()){
     case Top: {
@@ -161,7 +217,6 @@ void EllipseItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 //=========================================================================================================
 void EllipseItem::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 {
-    qDebug() << " MOUSE PRESS";
     if(ev->button() == Qt::LeftButton)
     {
         if(isSelected()){
@@ -169,21 +224,17 @@ void EllipseItem::mousePressEvent(QGraphicsSceneMouseEvent *ev)
             this->setCursor(Qt::SizeAllCursor);
         }
     }
-    //QGraphicsItem::mousePressEvent(ev);
 }
 
 //=========================================================================================================
 void EllipseItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)
 {
-    qDebug() << " MOUSE RELEASE";
     if(ev->button() == Qt::LeftButton)
     {
-        qDebug() << "EllipseItem::mouseReleaseEvent";
         this->setCursor(Qt::ArrowCursor);
 
             setSelected(true);
     }
-    //QGraphicsItem::mouseReleaseEvent(ev);
 }
 
 //=========================================================================================================
@@ -227,8 +278,11 @@ void EllipseItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 }
 
 //=========================================================================================================
-void EllipseItem::attachGrabbers(const QRectF &rect)
+void EllipseItem::attachGrabbers()
 {
+    auto rect = boundingRect();
+    rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+
     grabbingCorners[Top] = new GrabbingCorner(QPointF(rect.left() + rect.width()/2, rect.top()), GrabbingCorner::Top, this); //top
     connect(grabbingCorners[Top], SIGNAL(signalMove(GrabbingCorner*,qreal,qreal)), this, SLOT(cornerMove(GrabbingCorner*,qreal,qreal)));
 
@@ -254,6 +308,7 @@ void EllipseItem::attachGrabbers(const QRectF &rect)
     connect(grabbingCorners[BottomRight], SIGNAL(signalMove(GrabbingCorner*,qreal,qreal)), this, SLOT(cornerMove(GrabbingCorner*,qreal,qreal)));
 }
 
+//=========================================================================================================
 void EllipseItem::removeGrabbers()
 {
     for(auto gc : grabbingCorners)
@@ -262,26 +317,29 @@ void EllipseItem::removeGrabbers()
     }
 }
 
+//=========================================================================================================
 void EllipseItem::updateCornersPosition()
 {
-    grabbingCorners[Top]->setPos(rect().left() + rect().width()/2, rect().top()); //top
-    grabbingCorners[Bottom]->setPos(rect().left() + rect().width()/2, rect().bottom()); //bottom
-    grabbingCorners[Left]->setPos(rect().left(), rect().top()+rect().height()/2); //left
-    grabbingCorners[Right]->setPos(rect().right(), rect().top()+rect().height()/2); //right
-    grabbingCorners[TopLeft]->setPos(rect().left(), rect().top()); //top left
-    grabbingCorners[TopRight]->setPos(rect().right(), rect().top()); //top right
-    grabbingCorners[BottomLeft]->setPos(rect().left(), rect().bottom()); //bottom left
-    grabbingCorners[BottomRight]->setPos(rect().right(), rect().bottom()); //bottom right
+    auto rect = boundingRect();
+    rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+
+    grabbingCorners[Top]->setPos(rect.left() + rect.width()/2, rect.top()); //top
+    grabbingCorners[Bottom]->setPos(rect.left() + rect.width()/2, rect.bottom()); //bottom
+    grabbingCorners[Left]->setPos(rect.left(), rect.top()+rect.height()/2); //left
+    grabbingCorners[Right]->setPos(rect.right(), rect.top()+rect.height()/2); //right
+    grabbingCorners[TopLeft]->setPos(rect.left(), rect.top()); //top left
+    grabbingCorners[TopRight]->setPos(rect.right(), rect.top()); //top right
+    grabbingCorners[BottomLeft]->setPos(rect.left(), rect.bottom()); //bottom left
+    grabbingCorners[BottomRight]->setPos(rect.right(), rect.bottom()); //bottom right
 }
 
+//=========================================================================================================
 QVariant EllipseItem::itemChange(EllipseItem::GraphicsItemChange change, const QVariant &value)
 {
-    qDebug() << "ITEM CHANGED";
     if(change == EllipseItem::ItemSelectedHasChanged)
     {
-        qDebug() << "ITEM SELECION CHANGED";
         if(isSelected())
-            attachGrabbers(rect());
+            attachGrabbers();
         else
             removeGrabbers();
     }

@@ -19,13 +19,24 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
     document = new SvgDocument(QRectF(650,650,700,700));
 
     RectItem *rect = new RectItem(QRectF(300,300,400,400));
-    EllipseItem *ellipse = new EllipseItem(QRectF(700,300,400,400));
+    EllipseItem *ellipse = new EllipseItem(QRectF(700,300,500,500));
 
     connect(this, SIGNAL(updateDocumentScale(qreal)), document, SLOT(setScaleFactor(qreal)));
 
     this->addItem(document);
     this->addItem(rect);
     this->addItem(ellipse);
+
+//    qsrand(100);
+//    for(int i = 0; i < 10; i++)
+//    {
+
+//        EllipseItem *ellipse = new EllipseItem(QRectF(qrand() % 1000 + 200,qrand() % 1000 + 200,qrand() % 500 + 100,qrand() % 500 + 100));
+//        //ellipse->setPen(QPen(QColor()));
+//        ellipse->setBrush(QBrush(QColor(qrand() % 255,qrand() % 255,qrand() % 255)));
+//        ellipse->setPen(QPen(QColor(qrand() % 255,qrand() % 255,qrand() % 255), qrand()%100));
+//        this->addItem(ellipse);
+//    }
 }
 
 //=========================================================================================================
