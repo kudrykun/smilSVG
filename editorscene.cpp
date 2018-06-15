@@ -16,27 +16,15 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
     current_scale = 1;
     setSceneRect(0,0,2000,2000);
 
-    document = new SvgDocument(QRectF(650,650,700,700));
-
-    RectItem *rect = new RectItem(QRectF(300,300,400,400));
-    EllipseItem *ellipse = new EllipseItem(QRectF(700,300,500,500));
-
+    document = new SvgDocument(QRectF(350,350,1000,1000));
     connect(this, SIGNAL(updateDocumentScale(qreal)), document, SLOT(setScaleFactor(qreal)));
+    //RectItem *rect = new RectItem(QRectF(300,300,400,400));
+    //EllipseItem *ellipse = new EllipseItem(QRectF(700,300,500,500));
 
     this->addItem(document);
-    this->addItem(rect);
-    this->addItem(ellipse);
-
-//    qsrand(100);
-//    for(int i = 0; i < 10; i++)
-//    {
-
-//        EllipseItem *ellipse = new EllipseItem(QRectF(qrand() % 1000 + 200,qrand() % 1000 + 200,qrand() % 500 + 100,qrand() % 500 + 100));
-//        //ellipse->setPen(QPen(QColor()));
-//        ellipse->setBrush(QBrush(QColor(qrand() % 255,qrand() % 255,qrand() % 255)));
-//        ellipse->setPen(QPen(QColor(qrand() % 255,qrand() % 255,qrand() % 255), qrand()%100));
-//        this->addItem(ellipse);
-//    }
+    //this->addItem(rect);
+    //this->addItem(ellipse);
+    this->drawTestFigures();
 }
 
 //=========================================================================================================
@@ -53,4 +41,57 @@ void EditorScene::drawBackground(QPainter *painter, const QRectF &rect)
     painter->setPen(QPen(sceneColor));
     painter->setBrush(QBrush(sceneColor));
     painter->drawRect(this->sceneRect());
+}
+
+
+//=========================================================================================================
+void EditorScene::drawTestFigures()
+{
+    for(int i = 0; i < 10; i++)
+    {
+        float y = 100;
+        //прозрачность обводки
+        {
+            EllipseItem *ellipse = new EllipseItem(QRectF(10*i+i*80, y, 80, 80));
+            ellipse->setStrokeWidth(10);
+            ellipse->setStrokeOpacity(i/10.0);
+            this->addItem(ellipse);
+            y += 100;
+        }
+
+        //dasharray
+        {
+            EllipseItem *ellipse = new EllipseItem(QRectF(10*i+i*80, y, 80, 80));
+            ellipse->setStrokeWidth(10);
+            QVector<qreal> vec;
+            vec.push_back(0.5/(i+1));
+            vec.push_back(0.5*i);
+            ellipse->setStrokeDasharray(vec);
+            this->addItem(ellipse);
+            y += 100;
+        }
+
+
+        //прозрачность обводки
+        {
+            EllipseItem *ellipse = new EllipseItem(QRectF(10*i+i*80, y, 80, 80));
+            ellipse->setStrokeWidth(10);
+            ellipse->setStrokeOpacity(i/10.0);
+            this->addItem(ellipse);
+            y += 100;
+        }
+    }
+
+
+
+//    qsrand(100);
+//    for(int i = 0; i < 10; i++)
+//    {
+
+//        EllipseItem *ellipse = new EllipseItem(QRectF(qrand() % 1000 + 200,qrand() % 1000 + 200,qrand() % 500 + 100,qrand() % 500 + 100));
+//        //ellipse->setPen(QPen(QColor()));
+//        ellipse->setBrush(QBrush(QColor(qrand() % 255,qrand() % 255,qrand() % 255)));
+//        ellipse->setPen(QPen(QColor(qrand() % 255,qrand() % 255,qrand() % 255), qrand()%100));
+//        this->addItem(ellipse);
+//    }
 }

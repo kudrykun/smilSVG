@@ -1,7 +1,5 @@
 #include "rectitem.h"
 
-#include "ellipseitem.h"
-
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
@@ -22,7 +20,7 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
 QRectF RectItem::boundingRect() const
 {
     QRectF rect = this->rect();
-    rect.adjust(-currentPen.width(),-currentPen.width(),currentPen.width(),currentPen.width());
+    rect.adjust(-currentPen.width()/2,-currentPen.width()/2,currentPen.width()/2,currentPen.width()/2);
     qDebug() << rect;
     if(isSelected()){
         rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
@@ -36,24 +34,9 @@ void RectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     QRectF re = this->rect();
 
     painter->setBrush(currentBrush);
-    painter->setPen(QPen(Qt::NoPen));
-    if(rx != 0 || ry != 0)
-        painter->drawRoundedRect(re,rx,ry);
-    else
-        painter->drawRect(re);
+    painter->setPen(currentPen);
+    painter->drawRoundedRect(re,rx,ry);
 
-    QPainterPath painterPath;
-    re.adjust(-currentPen.width()/2, -currentPen.width()/2, currentPen.width()/2, currentPen.width()/2);
-    if(rx != 0 || ry != 0)
-        painterPath.addRoundedRect(re,rx*(re.width()/rect().width()),ry*(re.height()/rect().height()));
-    else
-        painterPath.addRect(re);
-
-    QPainterPathStroker stroker;
-    //stroker.setCapStyle(Qt::FlatCap);
-    stroker.createStroke(painterPath);
-
-    painter->strokePath(painterPath, currentPen);
     if(isSelected())
     {
         painter->setPen(QPen(QColor(21,146,230)));
@@ -77,26 +60,98 @@ void RectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget)
 }
 
+//=========================================================================================================
 void RectItem::setPen(const QPen &pen)
 {
     currentPen = pen;
 }
 
+//=========================================================================================================
 void RectItem::setBrush(const QBrush &brush)
 {
     currentBrush = brush;
 }
 
+//=========================================================================================================
 QPen RectItem::getPen()
 {
     return currentPen;
 }
 
+//=========================================================================================================
 QBrush RectItem::getBrush()
 {
     return currentBrush;
 }
 
+//=========================================================================================================
+void RectItem::setStrokeWidth(float w)
+{
+    currentPen.setWidthF(w);
+}
+
+//=========================================================================================================
+void RectItem::setStrokeOpacity(float op)
+{
+    if(op < 0)
+        op = 0;
+    if(op > 1)
+        op = 1;
+    auto new_color = currentPen.color();
+    new_color.setAlphaF(op);
+    currentPen.setColor(new_color);
+}
+
+//=========================================================================================================
+void RectItem::setStrokeColor(QColor stroke_color)
+{
+    auto new_color = stroke_color;
+    new_color.setAlpha(currentPen.color().alpha());
+    currentPen.setColor(new_color);
+}
+
+
+//=========================================================================================================
+void RectItem::setStrokeLineCap(Qt::PenCapStyle capStyle)
+{
+    currentPen.setCapStyle(capStyle);
+}
+
+//=========================================================================================================
+void RectItem::setStrokeLineJoin(Qt::PenJoinStyle joinStyle)
+{
+    currentPen.setJoinStyle(joinStyle);
+}
+
+//=========================================================================================================
+void RectItem::setStrokeDashoffset(qreal offset)
+{
+    if(offset >= 0)
+        currentPen.setDashOffset(offset);
+}
+
+//=========================================================================================================
+void RectItem::setStrokeDasharray(const QVector<qreal> &pattern)
+{
+    if(!pattern.empty())
+        currentPen.setDashPattern(pattern);
+}
+
+void RectItem::setR(float r)
+{
+   this->rx = r;
+   this->ry = r;
+}
+
+void RectItem::setRx(float rx)
+{
+    this->rx = rx;
+}
+
+void RectItem::setRy(float ry)
+{
+    this->ry = ry;
+}
 //=========================================================================================================
 void RectItem::setScaleFactor(qreal factor)
 {
@@ -344,9 +399,9 @@ void RectItem::updateCornersPosition()
 }
 
 //=========================================================================================================
-QVariant RectItem::itemChange(EllipseItem::GraphicsItemChange change, const QVariant &value)
+QVariant RectItem::itemChange(RectItem::GraphicsItemChange change, const QVariant &value)
 {
-    if(change == EllipseItem::ItemSelectedHasChanged)
+    if(change == RectItem::ItemSelectedHasChanged)
     {
         if(isSelected())
             attachGrabbers();

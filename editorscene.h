@@ -25,12 +25,17 @@ signals:
     void updateDocumentScale(qreal scale);
 
 private:
+    void drawTestFigures();
+
+private:
     Mode currentMode; //текущий инструмент
     KeyMode currentKeyMode; //текущий модификатор
 
     SvgDocument *document;
     QColor sceneColor = QColor(228,228,228);
     qreal current_scale;
+
+    bool debug_mode = true;
 };
 
 #endif // EDITORSCENE_H

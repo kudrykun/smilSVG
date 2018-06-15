@@ -33,7 +33,13 @@ public:
     void setBrush(const QBrush &brush);
     QPen getPen();
     QBrush getBrush();
-
+    void setStrokeWidth(float w);
+    void setStrokeOpacity(float op);
+    void setStrokeColor(QColor stroke_color);
+    void setStrokeLineCap(Qt::PenCapStyle capStyle);
+    void setStrokeLineJoin(Qt::PenJoinStyle joinStyle);
+    void setStrokeDashoffset(qreal offset);
+    void setStrokeDasharray(const QVector<qreal> & pattern);
 public slots:
     void setScaleFactor(qreal factor);
     void cornerMove(GrabbingCorner *owner, qreal dx, qreal dy);
@@ -53,10 +59,8 @@ private:
     QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
 
 private:
-    QBrush docBrush = QBrush(QColor(255,255,255));
-    QPen docPen = QPen(QColor(160,160,160), 20);
     QBrush currentBrush = QBrush(QColor(255,255,255));
-    QPen currentPen = QPen(QColor(120,120,120,40), 20);
+    QPen currentPen = QPen(QColor(120,120,120), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
 
     float cornerRad = 4;
     GrabbingCorner* grabbingCorners[8];

@@ -33,6 +33,13 @@ public:
     void setBrush(const QBrush &brush);
     QPen getPen();
     QBrush getBrush();
+    void setStrokeWidth(float w);
+    void setStrokeOpacity(float op);
+    void setStrokeColor(QColor stroke_color);
+    void setStrokeLineCap(Qt::PenCapStyle capStyle);
+    void setStrokeLineJoin(Qt::PenJoinStyle joinStyle);
+    void setStrokeDashoffset(qreal offset);
+    void setStrokeDasharray(const QVector<qreal> & pattern);
 
 public slots:
     void setScaleFactor(qreal factor);
@@ -54,16 +61,15 @@ private:
 
 private:
     QBrush docBrush = QBrush(QColor(255,255,255));
-    QPen docPen = QPen(QColor(160,160,160), 20);
     QBrush currentBrush = QBrush(QColor(255,255,255));
-    QPen currentPen = QPen(QColor(120,120,120,140), 20, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    QPen currentPen = QPen(QColor(120,120,120), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
 
     float cornerRad = 4;
     GrabbingCorner* grabbingCorners[8];
     unsigned int current_corner;
     QPointF previous_pos;
 
-    bool debug_mode = false;
+    bool debug_mode = true;
 
     float rx = 40;
     float ry = 20;

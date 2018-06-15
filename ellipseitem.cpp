@@ -20,7 +20,7 @@ EllipseItem::EllipseItem(const QRectF &rect) : QGraphicsEllipseItem(rect)
 QRectF EllipseItem::boundingRect() const
 {
     QRectF rect = this->rect();
-    rect.adjust(-currentPen.width(),-currentPen.width(),currentPen.width(),currentPen.width());
+    rect.adjust(-currentPen.width()/2,-currentPen.width()/2,currentPen.width()/2,currentPen.width()/2);
     qDebug() << rect;
     if(isSelected()){
         rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
@@ -34,16 +34,9 @@ void EllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     QRectF re = this->rect();
 
     painter->setBrush(currentBrush);
-    painter->setPen(QPen(Qt::NoPen));
+    painter->setPen(currentPen);
     painter->drawEllipse(re);
 
-    QPainterPath painterPath;
-    re.adjust(-currentPen.width()/2, -currentPen.width()/2, currentPen.width()/2, currentPen.width()/2);
-    painterPath.addEllipse(re);
-    QPainterPathStroker stroker;
-    stroker.createStroke(painterPath);
-
-    painter->strokePath(painterPath, currentPen);
     if(isSelected())
     {
         painter->setPen(QPen(QColor(21,146,230)));
@@ -67,24 +60,80 @@ void EllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     Q_UNUSED(widget)
 }
 
+//=========================================================================================================
 void EllipseItem::setPen(const QPen &pen)
 {
     currentPen = pen;
 }
 
+//=========================================================================================================
 void EllipseItem::setBrush(const QBrush &brush)
 {
     currentBrush = brush;
 }
 
+//=========================================================================================================
 QPen EllipseItem::getPen()
 {
     return currentPen;
 }
 
+//=========================================================================================================
 QBrush EllipseItem::getBrush()
 {
     return currentBrush;
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeWidth(float w)
+{
+    currentPen.setWidthF(w);
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeOpacity(float op)
+{
+    if(op < 0)
+        op = 0;
+    if(op > 1)
+        op = 1;
+    auto new_color = currentPen.color();
+    new_color.setAlphaF(op);
+    currentPen.setColor(new_color);
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeColor(QColor stroke_color)
+{
+    auto new_color = stroke_color;
+    new_color.setAlpha(currentPen.color().alpha());
+    currentPen.setColor(new_color);
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeLineCap(Qt::PenCapStyle capStyle)
+{
+    currentPen.setCapStyle(capStyle);
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeLineJoin(Qt::PenJoinStyle joinStyle)
+{
+    currentPen.setJoinStyle(joinStyle);
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeDashoffset(qreal offset)
+{
+    if(offset >= 0)
+        currentPen.setDashOffset(offset);
+}
+
+//=========================================================================================================
+void EllipseItem::setStrokeDasharray(const QVector<qreal> &pattern)
+{
+    if(!pattern.empty())
+        currentPen.setDashPattern(pattern);
 }
 
 //=========================================================================================================
