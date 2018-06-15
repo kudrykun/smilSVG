@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new EditorScene(this);
     view = new EditorView(scene, this);
     setCentralWidget(view);
+
+   // shortcuts.push_back(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_G),this,SLOT(scene->groupAction())));
+    auto groupping = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_G),this,SIGNAL(groupAction()));
+    connect(this, SIGNAL(groupAction()), scene, SLOT(groupAction()));
+    shortcuts.push_back(groupping);
 }
 
 MainWindow::~MainWindow()

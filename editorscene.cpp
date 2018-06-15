@@ -34,6 +34,13 @@ void EditorScene::updateScale(qreal scale)
     emit updateDocumentScale(scale);
 }
 
+void EditorScene::groupAction()
+{
+    qDebug() << "GROUP ACTION";
+    qDebug() << this->selectedItems().size();
+    QGraphicsItemGroup *group = this->createItemGroup(this->selectedItems());
+}
+
 //=========================================================================================================
 //переопределнный метод, используемый для отрисовки сетки
 void EditorScene::drawBackground(QPainter *painter, const QRectF &rect)
@@ -93,5 +100,5 @@ void EditorScene::drawTestFigures()
 //        ellipse->setBrush(QBrush(QColor(qrand() % 255,qrand() % 255,qrand() % 255)));
 //        ellipse->setPen(QPen(QColor(qrand() % 255,qrand() % 255,qrand() % 255), qrand()%100));
 //        this->addItem(ellipse);
-//    }
+    //    }
 }

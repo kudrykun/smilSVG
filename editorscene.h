@@ -18,6 +18,7 @@ public:
 public slots:
     void setMode(int mode) {currentMode = static_cast<Mode>(mode);} //установка инструмента
     void updateScale(qreal scale);
+    void groupAction();
 protected:
     //переопределнный метод, используемый для отрисовки сетки
     void drawBackground(QPainter *painter, const QRectF &rect);
@@ -26,6 +27,7 @@ signals:
 
 private:
     void drawTestFigures();
+    void setupHotkeys();
 
 private:
     Mode currentMode; //текущий инструмент

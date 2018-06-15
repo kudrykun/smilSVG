@@ -5,6 +5,7 @@
 #include <QGraphicsView>
 #include "editorscene.h"
 #include "editorview.h"
+#include <QShortcut>
 
 namespace Ui {
 class MainWindow;
@@ -19,11 +20,17 @@ public:
     ~MainWindow();
 
     EditorScene* getMainScene() {return scene;}
+
+signals:
+    void groupAction();
+
 private:
     Ui::MainWindow *ui;
 
     EditorView *view;
     EditorScene *scene;
+
+    QVector<QShortcut*> shortcuts;
 };
 
 #endif // MAINWINDOW_H
