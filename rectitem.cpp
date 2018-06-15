@@ -137,21 +137,25 @@ void RectItem::setStrokeDasharray(const QVector<qreal> &pattern)
         currentPen.setDashPattern(pattern);
 }
 
+//=========================================================================================================
 void RectItem::setR(float r)
 {
    this->rx = r;
    this->ry = r;
 }
 
+//=========================================================================================================
 void RectItem::setRx(float rx)
 {
     this->rx = rx;
 }
 
+//=========================================================================================================
 void RectItem::setRy(float ry)
 {
     this->ry = ry;
 }
+
 //=========================================================================================================
 void RectItem::setScaleFactor(qreal factor)
 {

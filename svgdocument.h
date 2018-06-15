@@ -37,6 +37,7 @@ public slots:
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *ev) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *ev) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *ev) override;
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
@@ -44,15 +45,15 @@ protected:
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
-    void drawGripCorners(QPainter *painter, const QRectF &rect);
-    void attachGrabbers(const QRectF &rect);
+    void attachGrabbers();
+    void removeGrabbers();
     void updateCornersPosition();
+    QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
 
 private:
     QBrush docBrush = QBrush(QColor(255,255,255));
     QPen docPen = QPen(QColor(160,160,160));
 
-    bool selected = true;
     bool space_pressed = false;
     float cornerRad = 4;
     GrabbingCorner* grabbingCorners[8];

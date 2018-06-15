@@ -8,7 +8,6 @@ SvgDocument::SvgDocument(const QRectF &rect) : QGraphicsRectItem(rect)
 {
     setPen(docPen);
     setBrush(docBrush);
-    attachGrabbers(rect);
     setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
@@ -17,14 +16,11 @@ SvgDocument::SvgDocument(const QRectF &rect) : QGraphicsRectItem(rect)
 //=========================================================================================================
 QRectF SvgDocument::boundingRect() const
 {
-    QRectF rect = QGraphicsRectItem::boundingRect();
-
-    //если элемент выбран, то добавятся углы и размер rect увеличиваем и смещаем его
-    if(selected){
-        rect.setX(rect.x() - cornerRad);
-        rect.setY(rect.y() - cornerRad);
-        rect.setWidth(rect.width()+2*cornerRad);
-        rect.setHeight(rect.height()+2*cornerRad);
+    QRectF rect = this->rect();
+    rect.adjust(-docPen.width()/2,-docPen.width()/2,docPen.width()/2,docPen.width()/2);
+    qDebug() << rect;
+    if(isSelected()){
+        rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
     }
     return rect;
 }
@@ -32,18 +28,23 @@ QRectF SvgDocument::boundingRect() const
 //=========================================================================================================
 void SvgDocument::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QRectF re = QGraphicsRectItem::boundingRect();
+    QRectF re = this->rect();
 
-    // если элемент выбран, то меняем цвет его границы
-    if(selected){
-        painter->setPen(QPen(QColor(21,146,230)));
-    }
-    else{
-        painter->setPen(this->pen());
-    }
-
-    painter->setBrush(this->brush());
+    painter->setBrush(docBrush);
+    painter->setPen(docPen);
     painter->drawRect(re);
+
+    if(isSelected())
+    {
+        painter->setPen(QPen(QColor(21,146,230)));
+        painter->setBrush(QBrush(QColor(0,0,0,0)));
+        auto rect = boundingRect();
+        rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+        painter->drawRect(rect);
+    }
+
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
 }
 
 //=========================================================================================================
@@ -52,6 +53,7 @@ void SvgDocument::setScaleFactor(qreal factor)
     cornerRad /= factor;
 }
 
+//=========================================================================================================
 void SvgDocument::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 {
     QRectF tempRect = rect();
@@ -159,7 +161,16 @@ void SvgDocument::mousePressEvent(QGraphicsSceneMouseEvent *ev)
         previous_pos = ev->pos();
         this->setCursor(Qt::SizeAllCursor);
     }
-    QGraphicsItem::mousePressEvent(ev);
+   // QGraphicsItem::mousePressEvent(ev);
+}
+
+//=========================================================================================================
+void SvgDocument::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *ev)
+{
+    if(ev->button() == Qt::LeftButton)
+    {
+        this->setSelected(true);
+    }
 }
 
 //=========================================================================================================
@@ -170,14 +181,16 @@ void SvgDocument::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)
         qDebug() << "SvgDocument::mouseReleaseEvent";
         this->setCursor(Qt::ArrowCursor);
     }
-    QGraphicsItem::mouseReleaseEvent(ev);
+    //QGraphicsItem::mouseReleaseEvent(ev);
 }
 
 //=========================================================================================================
 void SvgDocument::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
-    auto d = ev->pos() - previous_pos;
-    this->moveBy(d.x(), d.y());
+    if(isSelected()){
+        auto d = ev->pos() - previous_pos;
+        this->moveBy(d.x(), d.y());
+    }
     QGraphicsItem::mouseMoveEvent(ev);
 }
 
@@ -212,8 +225,11 @@ void SvgDocument::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 }
 
 //=========================================================================================================
-void SvgDocument::attachGrabbers(const QRectF &rect)
+void SvgDocument::attachGrabbers()
 {
+    auto rect = boundingRect();
+    rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+
     grabbingCorners[Top] = new GrabbingCorner(QPointF(rect.left() + rect.width()/2, rect.top()), GrabbingCorner::Top, this); //top
     connect(grabbingCorners[Top], SIGNAL(signalMove(GrabbingCorner*,qreal,qreal)), this, SLOT(cornerMove(GrabbingCorner*,qreal,qreal)));
 
@@ -239,14 +255,42 @@ void SvgDocument::attachGrabbers(const QRectF &rect)
     connect(grabbingCorners[BottomRight], SIGNAL(signalMove(GrabbingCorner*,qreal,qreal)), this, SLOT(cornerMove(GrabbingCorner*,qreal,qreal)));
 }
 
+//=========================================================================================================
+void SvgDocument::removeGrabbers()
+{
+    for(auto gc : grabbingCorners)
+    {
+       delete gc;
+    }
+}
+
+//=========================================================================================================
 void SvgDocument::updateCornersPosition()
 {
-    grabbingCorners[Top]->setPos(rect().left() + rect().width()/2, rect().top()); //top
-    grabbingCorners[Bottom]->setPos(rect().left() + rect().width()/2, rect().bottom()); //bottom
-    grabbingCorners[Left]->setPos(rect().left(), rect().top()+rect().height()/2); //left
-    grabbingCorners[Right]->setPos(rect().right(), rect().top()+rect().height()/2); //right
-    grabbingCorners[TopLeft]->setPos(rect().left(), rect().top()); //top left
-    grabbingCorners[TopRight]->setPos(rect().right(), rect().top()); //top right
-    grabbingCorners[BottomLeft]->setPos(rect().left(), rect().bottom()); //bottom left
-    grabbingCorners[BottomRight]->setPos(rect().right(), rect().bottom()); //bottom right
+    auto rect = boundingRect();
+    rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+
+    grabbingCorners[Top]->setPos(rect.left() + rect.width()/2, rect.top()); //top
+    grabbingCorners[Bottom]->setPos(rect.left() + rect.width()/2, rect.bottom()); //bottom
+    grabbingCorners[Left]->setPos(rect.left(), rect.top()+rect.height()/2); //left
+    grabbingCorners[Right]->setPos(rect.right(), rect.top()+rect.height()/2); //right
+    grabbingCorners[TopLeft]->setPos(rect.left(), rect.top()); //top left
+    grabbingCorners[TopRight]->setPos(rect.right(), rect.top()); //top right
+    grabbingCorners[BottomLeft]->setPos(rect.left(), rect.bottom()); //bottom left
+    grabbingCorners[BottomRight]->setPos(rect.right(), rect.bottom()); //bottom right
 }
+
+//=========================================================================================================
+QVariant SvgDocument::itemChange(SvgDocument::GraphicsItemChange change, const QVariant &value)
+{
+    if(change == SvgDocument::ItemSelectedHasChanged)
+    {
+        if(isSelected())
+            attachGrabbers();
+        else
+            removeGrabbers();
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
+
+

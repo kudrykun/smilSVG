@@ -40,6 +40,9 @@ public:
     void setStrokeLineJoin(Qt::PenJoinStyle joinStyle);
     void setStrokeDashoffset(qreal offset);
     void setStrokeDasharray(const QVector<qreal> & pattern);
+    void setR(float r);
+    void setRx(float rx);
+    void setRy(float ry);
 
 public slots:
     void setScaleFactor(qreal factor);
@@ -71,8 +74,8 @@ private:
 
     bool debug_mode = true;
 
-    float rx = 40;
-    float ry = 20;
+    float rx = 0;
+    float ry = 0;
 };
 
 #endif // RECTITEM_H
