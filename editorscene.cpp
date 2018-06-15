@@ -5,7 +5,7 @@
 #include "document.h"
 #include "rectitem.h"
 #include "ellipseitem.h"
-
+#include "grouppingitem.h"
 
 
 //=========================================================================================================
@@ -38,7 +38,12 @@ void EditorScene::groupAction()
 {
     qDebug() << "GROUP ACTION";
     qDebug() << this->selectedItems().size();
-    QGraphicsItemGroup *group = this->createItemGroup(this->selectedItems());
+    GrouppingItem *group = new GrouppingItem();
+    for(auto &e : this->selectedItems())
+    {
+        group->addToGroup(e);
+    }
+    this->addItem(group);
 }
 
 //=========================================================================================================

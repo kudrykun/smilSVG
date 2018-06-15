@@ -1,23 +1,21 @@
-#include "svgdocument.h"
+#include "grouppingitem.h"
+
 #include <QDebug>
 #include <QPainter>
 #include <QCursor>
 
 //=========================================================================================================
-SvgDocument::SvgDocument(const QRectF &rect) : QGraphicsRectItem(rect)
+GrouppingItem::GrouppingItem() : QGraphicsItemGroup()
 {
-    setPen(docPen);
-    setBrush(docBrush);
     setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
 }
 
 //=========================================================================================================
-QRectF SvgDocument::boundingRect() const
+QRectF GrouppingItem::boundingRect() const
 {
-    QRectF rect = this->rect();
-    rect.adjust(-docPen.width()/2,-docPen.width()/2,docPen.width()/2,docPen.width()/2);
+    QRectF rect = this->boundingRect();
     if(isSelected()){
         rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
     }
@@ -25,14 +23,8 @@ QRectF SvgDocument::boundingRect() const
 }
 
 //=========================================================================================================
-void SvgDocument::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void GrouppingItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QRectF re = this->rect();
-
-    painter->setBrush(docBrush);
-    painter->setPen(docPen);
-    painter->drawRect(re);
-
     if(isSelected())
     {
         painter->setPen(QPen(QColor(21,146,230)));
@@ -47,113 +39,107 @@ void SvgDocument::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 }
 
 //=========================================================================================================
-void SvgDocument::setScaleFactor(qreal factor)
+void GrouppingItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 {
-    cornerRad /= factor;
+//    QRectF tempRect = rect();
+//    QRectF tempTempRect = tempRect;
+
+//    float minSize = 10;
+
+//    switch(owner->getCornerType()){
+//    case Top: {
+//        tempTempRect.setTop(tempTempRect.top()+dy);
+//        break;
+//    }
+//    case Bottom: {
+//        tempTempRect.setBottom(tempTempRect.bottom()+dy);
+//        break;
+//    }
+//    case Right: {
+//        tempTempRect.setRight(tempTempRect.right()+dx);
+//        break;
+//    }
+//    case Left: {
+//        tempTempRect.setLeft(tempTempRect.left()+dx);
+//        break;
+//    }
+//    case TopLeft: {
+//        tempTempRect.setTopLeft(QPointF(tempTempRect.left()+dx,tempTempRect.top()+dy));
+//        break;
+//    }
+//    case BottomRight:{
+//        tempTempRect.setBottomRight(QPointF(tempTempRect.right()+dx,tempTempRect.bottom()+dy));
+//        break;
+//    }
+//    case TopRight:{
+//        tempTempRect.setTopRight(QPointF(tempTempRect.right()+dx,tempTempRect.top()+dy));
+//        break;
+//    }
+//    case BottomLeft: {
+//        tempTempRect.setBottomLeft(QPointF(tempTempRect.left()+dx,tempTempRect.bottom()+dy));
+//        break;
+//    }
+//}
+//    switch(owner->getCornerType())
+//{
+//    case Top: {
+//        if(tempTempRect.height() >= minSize)
+//            tempRect.setTop(tempRect.top()+dy);
+//        break;
+//    }
+//    case Bottom: {
+//        if(tempTempRect.height() >= minSize)
+//            tempRect.setBottom(tempRect.bottom()+dy);
+//        break;
+//    }
+//    case Right: {
+//        if(tempTempRect.width() >= minSize)
+//            tempRect.setRight(tempRect.right()+dx);
+//        break;
+//    }
+//    case Left: {
+//        if(tempTempRect.width() >= minSize)
+//            tempRect.setLeft(tempRect.left()+dx);
+//        break;
+//    }
+//    case TopLeft: {
+//        if(tempTempRect.height() >= minSize)
+//            tempRect.setTop(tempRect.top()+dy);
+//        if(tempTempRect.width() >= minSize)
+//            tempRect.setLeft(tempRect.left()+dx);
+//        break;
+//    }
+//    case BottomRight:{
+//        if(tempTempRect.height() >= minSize)
+//            tempRect.setBottom(tempRect.bottom()+dy);
+//        if(tempTempRect.width() >= minSize)
+//            tempRect.setRight(tempRect.right()+dx);
+//        break;
+//    }
+//    case TopRight:{
+//        if(tempTempRect.height() >= minSize)
+//            tempRect.setTop(tempRect.top()+dy);
+//        if(tempTempRect.width() >= minSize)
+//            tempRect.setRight(tempRect.right()+dx);
+//        break;
+//    }
+//    case BottomLeft: {
+//        if(tempTempRect.height() >= minSize)
+//            tempRect.setBottom(tempRect.bottom()+dy);
+//        if(tempTempRect.width() >= minSize)
+//            tempRect.setLeft(tempRect.left()+dx);
+//        break;
+//    }
+//}
+
+//    prepareGeometryChange();
+//    setRect( tempRect );
+//    update();
+//    updateCornersPosition();
 }
 
 //=========================================================================================================
-void SvgDocument::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
-{
-    QRectF tempRect = rect();
-    QRectF tempTempRect = tempRect;
-
-    float minSize = 10;
-
-    switch(owner->getCornerType()){
-    case Top: {
-        tempTempRect.setTop(tempTempRect.top()+dy);
-        break;
-    }
-    case Bottom: {
-        tempTempRect.setBottom(tempTempRect.bottom()+dy);
-        break;
-    }
-    case Right: {
-        tempTempRect.setRight(tempTempRect.right()+dx);
-        break;
-    }
-    case Left: {
-        tempTempRect.setLeft(tempTempRect.left()+dx);
-        break;
-    }
-    case TopLeft: {
-        tempTempRect.setTopLeft(QPointF(tempTempRect.left()+dx,tempTempRect.top()+dy));
-        break;
-    }
-    case BottomRight:{
-        tempTempRect.setBottomRight(QPointF(tempTempRect.right()+dx,tempTempRect.bottom()+dy));
-        break;
-    }
-    case TopRight:{
-        tempTempRect.setTopRight(QPointF(tempTempRect.right()+dx,tempTempRect.top()+dy));
-        break;
-    }
-    case BottomLeft: {
-        tempTempRect.setBottomLeft(QPointF(tempTempRect.left()+dx,tempTempRect.bottom()+dy));
-        break;
-    }
-}
-    switch(owner->getCornerType())
-{
-    case Top: {
-        if(tempTempRect.height() >= minSize)
-            tempRect.setTop(tempRect.top()+dy);
-        break;
-    }
-    case Bottom: {
-        if(tempTempRect.height() >= minSize)
-            tempRect.setBottom(tempRect.bottom()+dy);
-        break;
-    }
-    case Right: {
-        if(tempTempRect.width() >= minSize)
-            tempRect.setRight(tempRect.right()+dx);
-        break;
-    }
-    case Left: {
-        if(tempTempRect.width() >= minSize)
-            tempRect.setLeft(tempRect.left()+dx);
-        break;
-    }
-    case TopLeft: {
-        if(tempTempRect.height() >= minSize)
-            tempRect.setTop(tempRect.top()+dy);
-        if(tempTempRect.width() >= minSize)
-            tempRect.setLeft(tempRect.left()+dx);
-        break;
-    }
-    case BottomRight:{
-        if(tempTempRect.height() >= minSize)
-            tempRect.setBottom(tempRect.bottom()+dy);
-        if(tempTempRect.width() >= minSize)
-            tempRect.setRight(tempRect.right()+dx);
-        break;
-    }
-    case TopRight:{
-        if(tempTempRect.height() >= minSize)
-            tempRect.setTop(tempRect.top()+dy);
-        if(tempTempRect.width() >= minSize)
-            tempRect.setRight(tempRect.right()+dx);
-        break;
-    }
-    case BottomLeft: {
-        if(tempTempRect.height() >= minSize)
-            tempRect.setBottom(tempRect.bottom()+dy);
-        if(tempTempRect.width() >= minSize)
-            tempRect.setLeft(tempRect.left()+dx);
-        break;
-    }
-}
-
-    prepareGeometryChange();
-    setRect( tempRect );
-    update();
-    updateCornersPosition();
-}
-
-//=========================================================================================================
-void SvgDocument::mousePressEvent(QGraphicsSceneMouseEvent *ev)
+void GrouppingItem::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 {
     if(ev->button() == Qt::LeftButton)
     {
@@ -164,7 +150,7 @@ void SvgDocument::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 }
 
 //=========================================================================================================
-void SvgDocument::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *ev)
+void GrouppingItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *ev)
 {
     if(ev->button() == Qt::LeftButton)
     {
@@ -173,7 +159,7 @@ void SvgDocument::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *ev)
 }
 
 //=========================================================================================================
-void SvgDocument::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)
+void GrouppingItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)
 {
     if(ev->button() == Qt::LeftButton)
     {
@@ -183,7 +169,7 @@ void SvgDocument::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)
 }
 
 //=========================================================================================================
-void SvgDocument::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
+void GrouppingItem::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
     if(isSelected()){
         auto d = ev->pos() - previous_pos;
@@ -193,29 +179,34 @@ void SvgDocument::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 }
 
 //=========================================================================================================
-void SvgDocument::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void GrouppingItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     QGraphicsItem::hoverEnterEvent(event);
 }
 
 //=========================================================================================================
-void SvgDocument::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void GrouppingItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
 //=========================================================================================================
-void SvgDocument::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+void GrouppingItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    QPointF pt = event->pos();              // The current position of the mouse
-    qreal drx = pt.x() - rect().right();    // Distance between the mouse and the right
-    qreal dlx = pt.x() - rect().left();     // Distance between the mouse and the left
+    QRectF rect = this->boundingRect();
+    if(isSelected()){
+        rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
+    }
 
-    qreal dty = pt.y() - rect().top();      // Distance between the mouse and the top
-    qreal dby = pt.y() - rect().bottom();   // Distance between the mouse and the botto
+    QPointF pt = event->pos();              // The current position of the mouse
+    qreal drx = pt.x() - rect.right();    // Distance between the mouse and the right
+    qreal dlx = pt.x() - rect.left();     // Distance between the mouse and the left
+
+    qreal dty = pt.y() - rect.top();      // Distance between the mouse and the top
+    qreal dby = pt.y() - rect.bottom();   // Distance between the mouse and the botto
 
     current_corner = 0;
-    if( dby < 8 && dby > -8 && (dlx >= rect().width()/2-8 && dlx <= rect().width()/2+8)) current_corner |= Bottom;       // Top side
+    if( dby < 8 && dby > -8 && (dlx >= rect.width()/2-8 && dlx <= rect.width()/2+8)) current_corner |= Bottom;       // Top side
     if( dty < 4 && dty > -4 ) current_corner |= Top;    // Bottom side
     if( drx < 4 && drx > -4 ) current_corner |= Right;     // Right side
     if( dlx < 4 && dlx > -4 ) current_corner |= Left;      // Left side
@@ -223,7 +214,7 @@ void SvgDocument::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 }
 
 //=========================================================================================================
-void SvgDocument::attachGrabbers()
+void GrouppingItem::attachGrabbers()
 {
     auto rect = boundingRect();
     rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
@@ -254,7 +245,7 @@ void SvgDocument::attachGrabbers()
 }
 
 //=========================================================================================================
-void SvgDocument::removeGrabbers()
+void GrouppingItem::removeGrabbers()
 {
     for(auto gc : grabbingCorners)
     {
@@ -263,7 +254,7 @@ void SvgDocument::removeGrabbers()
 }
 
 //=========================================================================================================
-void SvgDocument::updateCornersPosition()
+void GrouppingItem::updateCornersPosition()
 {
     auto rect = boundingRect();
     rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
@@ -279,9 +270,9 @@ void SvgDocument::updateCornersPosition()
 }
 
 //=========================================================================================================
-QVariant SvgDocument::itemChange(SvgDocument::GraphicsItemChange change, const QVariant &value)
+QVariant GrouppingItem::itemChange(GrouppingItem::GraphicsItemChange change, const QVariant &value)
 {
-    if(change == SvgDocument::ItemSelectedHasChanged)
+    if(change == GrouppingItem::ItemSelectedHasChanged)
     {
         if(isSelected())
             attachGrabbers();
@@ -290,5 +281,6 @@ QVariant SvgDocument::itemChange(SvgDocument::GraphicsItemChange change, const Q
     }
     return QGraphicsItem::itemChange(change, value);
 }
+
 
 

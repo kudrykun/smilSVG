@@ -21,7 +21,6 @@ QRectF RectItem::boundingRect() const
 {
     QRectF rect = this->rect();
     rect.adjust(-currentPen.width()/2,-currentPen.width()/2,currentPen.width()/2,currentPen.width()/2);
-    qDebug() << rect;
     if(isSelected()){
         rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
     }

@@ -31,7 +31,8 @@ SOURCES += \
     svgdocument.cpp \
     grabbingcorner.cpp \
     rectitem.cpp \
-    ellipseitem.cpp
+    ellipseitem.cpp \
+    grouppingitem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS += \
     svgdocument.h \
     grabbingcorner.h \
     rectitem.h \
-    ellipseitem.h
+    ellipseitem.h \
+    grouppingitem.h
 
 FORMS += \
         mainwindow.ui
