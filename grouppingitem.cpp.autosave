@@ -15,7 +15,7 @@ GrouppingItem::GrouppingItem() : QGraphicsItemGroup()
 //=========================================================================================================
 QRectF GrouppingItem::boundingRect() const
 {
-    qDebug() << "GROUP BIUNDING RECT!";
+    qDebug() << "GROUP BIUNDING RECT!" << " " << this->group();
     QRectF rect = this->boundingRect();
     if(isSelected()){
         rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
