@@ -15,6 +15,7 @@ class GrouppingItem : public  QObject, public QGraphicsItemGroup
     Q_OBJECT
 public:
     GrouppingItem();
+    ~GrouppingItem();
     QRectF boundingRect() const;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

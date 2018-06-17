@@ -12,11 +12,15 @@ GrouppingItem::GrouppingItem() : QGraphicsItemGroup()
     current_corner = 0;
 }
 
+GrouppingItem::~GrouppingItem()
+{
+   removeGrabbers();
+}
+
 //=========================================================================================================
 QRectF GrouppingItem::boundingRect() const
 {
-    qDebug() << "GROUP BIUNDING RECT!";
-    QRectF rect = this->boundingRect();
+    QRectF rect = this->childrenBoundingRect();
     if(isSelected()){
         rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
     }

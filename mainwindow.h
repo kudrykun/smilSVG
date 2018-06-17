@@ -23,7 +23,7 @@ public:
 
 signals:
     void groupAction();
-
+    void ungroupAction();
 private:
     Ui::MainWindow *ui;
 

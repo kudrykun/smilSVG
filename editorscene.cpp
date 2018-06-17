@@ -6,6 +6,7 @@
 #include "rectitem.h"
 #include "ellipseitem.h"
 #include "grouppingitem.h"
+#include <QGraphicsItemGroup>
 
 
 //=========================================================================================================
@@ -34,16 +35,31 @@ void EditorScene::updateScale(qreal scale)
     emit updateDocumentScale(scale);
 }
 
+//=========================================================================================================
 void EditorScene::groupAction()
 {
-    qDebug() << "GROUP ACTION";
-    qDebug() << this->selectedItems().size();
     GrouppingItem *group = new GrouppingItem();
+    this->addItem(group);
+    if(this->selectedItems().size() > 1)
+    {
+        for(auto &e : this->selectedItems())
+        {
+            e->setSelected(false);
+            group->addToGroup(e);
+        }
+        group->setSelected(true);
+    }
+}
+
+//=========================================================================================================
+void EditorScene::ungroupAction()
+{
     for(auto &e : this->selectedItems())
     {
-        group->addToGroup(e);
+        GrouppingItem* grouppingItem = qgraphicsitem_cast<GrouppingItem*>(e);
+        if(grouppingItem != 0)
+            this->destroyItemGroup(grouppingItem);
     }
-    this->addItem(group);
 }
 
 //=========================================================================================================
