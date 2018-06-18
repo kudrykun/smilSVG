@@ -388,8 +388,10 @@ QVariant EllipseItem::itemChange(EllipseItem::GraphicsItemChange change, const Q
     {
         if(isSelected())
             attachGrabbers();
-        else
+        else{
             removeGrabbers();
+            qDebug() << "REMOVE GABBERS";
+        }
     }
     return QGraphicsItem::itemChange(change, value);
 }

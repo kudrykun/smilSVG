@@ -21,9 +21,10 @@ GrouppingItem::~GrouppingItem()
 QRectF GrouppingItem::boundingRect() const
 {
     QRectF rect = this->childrenBoundingRect();
-    if(isSelected()){
-        rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
-    }
+    //rect = this->boundingRect();
+//    if(isSelected()){
+//        rect.adjust(-cornerRad/2, - cornerRad/2, cornerRad/2, cornerRad/2);
+//    }
     return rect;
 }
 
@@ -34,9 +35,10 @@ void GrouppingItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     {
         painter->setPen(QPen(QColor(21,146,230)));
         painter->setBrush(QBrush(QColor(0,0,0,0)));
-        auto rect = boundingRect();
-        rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
-        painter->drawRect(rect);
+        //auto rect = boundingRect();
+        //rect.adjust(cornerRad/2,cornerRad/2, -cornerRad/2, -cornerRad/2);
+        //painter->drawRect(rect);
+        painter->drawRect(boundingRect());
     }
 
     Q_UNUSED(option)

@@ -32,7 +32,8 @@ SOURCES += \
     grabbingcorner.cpp \
     rectitem.cpp \
     ellipseitem.cpp \
-    grouppingitem.cpp
+    grouppingitem.cpp \
+    lineitem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     grabbingcorner.h \
     rectitem.h \
     ellipseitem.h \
-    grouppingitem.h
+    grouppingitem.h \
+    lineitem.h
 
 FORMS += \
         mainwindow.ui
