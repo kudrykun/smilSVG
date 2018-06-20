@@ -26,6 +26,7 @@ public:
 
 public:
     RectItem(const QRectF &rect);
+    RectItem* copy();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 

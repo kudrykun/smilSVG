@@ -6,6 +6,7 @@
 #include "editorscene.h"
 #include "editorview.h"
 #include <QShortcut>
+#include <QActionGroup>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,20 @@ public:
 signals:
     void groupAction();
     void ungroupAction();
+    void unselectToolSignal();
+    void deleteItem();
+    void duplicateItem();
+
+public slots:
+    void unselectToolSlot();
+    void addLineActionToggled(bool);
+    void addRectActionToggled(bool);
+    void addEllipseActionToggled(bool);
+
+private:
+    void createItemsActionGroup();
+    void createEditionActionGroup();
+    void createItemsToolbar();
 private:
     Ui::MainWindow *ui;
 
@@ -31,6 +46,9 @@ private:
     EditorScene *scene;
 
     QVector<QShortcut*> shortcuts;
+
+    QActionGroup *itemsActionGroup;
+    QActionGroup *editionActionGroup;
 };
 
 #endif // MAINWINDOW_H

@@ -20,6 +20,7 @@ public:
 
 public:
     LineItem(const QLineF &line);
+    LineItem* copy();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 

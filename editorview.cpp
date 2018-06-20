@@ -2,6 +2,9 @@
 #include <QApplication>
 #include <QDebug>
 #include <QScrollBar>
+#include "rectitem.h"
+#include "ellipseitem.h"
+#include "lineitem.h"
 //=========================================================================================================
 EditorView::EditorView(EditorScene *scene, QObject *parent)
 {
@@ -10,6 +13,69 @@ EditorView::EditorView(EditorScene *scene, QObject *parent)
     connect(this, SIGNAL(scaleChanged(qreal)), scene, SLOT(updateScale(qreal)));
     //setMouseTracking(true);
 }
+
+//=========================================================================================================
+void EditorView::deleteItem()
+{
+    auto items = scene()->selectedItems();
+    for(auto &i : items)
+        scene()->removeItem(i);
+    qDebug() << "DELE SLOTE";
+}
+
+//=========================================================================================================
+void EditorView::duplicateItem()
+{
+    qDebug() << scene()->selectedItems().size();
+    for(auto &i : scene()->selectedItems())
+    {
+        bool duplicated = false;
+
+        if(!duplicated){
+            RectItem* item = dynamic_cast<RectItem*>(i);
+            if(item != 0)
+            {
+                RectItem* newItem = item->copy();
+                newItem->moveBy(10,10);
+                scene()->addItem(newItem);
+
+                i->setSelected(false);
+                newItem->setSelected(true);
+                duplicated = true;
+            }
+        }
+
+        if(!duplicated){
+            EllipseItem* item = dynamic_cast<EllipseItem*>(i);
+            if(item != 0)
+            {
+                EllipseItem* newItem = item->copy();
+                newItem->moveBy(10,10);
+                scene()->addItem(newItem);
+
+                i->setSelected(false);
+                newItem->setSelected(true);
+                duplicated = true;
+            }
+        }
+
+        if(!duplicated){
+            LineItem* item = dynamic_cast<LineItem*>(i);
+            if(item != 0)
+            {
+                LineItem* newItem = item->copy();
+                newItem->moveBy(10,10);
+                scene()->addItem(newItem);
+
+                i->setSelected(false);
+                newItem->setSelected(true);
+                duplicated = true;
+            }
+        }
+    }
+}
+
+
 
 //=========================================================================================================
 //переопределяем для зума сцены
@@ -38,7 +104,7 @@ void EditorView::wheelEvent(QWheelEvent *ev)
 
 //=========================================================================================================
 void EditorView::mousePressEvent(QMouseEvent *ev)
-{
+{   
     if(ev->button() == Qt::LeftButton)
     {
         lmb_pressed = true;
@@ -56,6 +122,20 @@ void EditorView::mousePressEvent(QMouseEvent *ev)
 //=========================================================================================================
 void EditorView::mouseMoveEvent(QMouseEvent *ev)
 {
+    if(item_tool_state != None && lmb_pressed){
+        qDebug() << "MOUSE MOVE IN VIEW";
+        switch(item_tool_state)
+        {
+            case RectTool:{
+                if(drawing_item != 0)
+                    scene()->removeItem(drawing_item);
+                drawing_item = new RectItem(QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized());
+                scene()->addItem(drawing_item);
+                //QGraphicsView::mouseMoveEvent(ev);
+                return;
+            }
+        }
+    }
     if(space_pressed && lmb_pressed){
         auto tr = ev->pos() - previous_mouse_pos;
         this->horizontalScrollBar()->setValue( this->horizontalScrollBar()->value() - tr.x());
@@ -69,6 +149,19 @@ void EditorView::mouseMoveEvent(QMouseEvent *ev)
 //=========================================================================================================
 void EditorView::mouseReleaseEvent(QMouseEvent *ev)
 {
+    if(item_tool_state != None && lmb_pressed){
+        switch(item_tool_state)
+        {
+            case RectTool:{
+                if(drawing_item != 0){
+                    drawing_item = nullptr;
+                    //QGraphicsView::mouseMoveEvent(ev);
+
+                }
+            }
+        }
+    }
+
     if(ev->button() == Qt::LeftButton)
     {
         lmb_pressed = false;

@@ -17,6 +17,16 @@ EllipseItem::EllipseItem(const QRectF &rect) : QGraphicsEllipseItem(rect)
 }
 
 //=========================================================================================================
+EllipseItem *EllipseItem::copy()
+{
+    EllipseItem *newItem = new EllipseItem(this->rect());
+    newItem->setPen(this->getPen());
+    newItem->setPos(this->pos());
+    newItem->setBrush(this->getBrush());
+    return newItem;
+}
+
+//=========================================================================================================
 QRectF EllipseItem::boundingRect() const
 {
     QRectF rect = this->rect();
@@ -147,28 +157,7 @@ void EllipseItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     QRectF tempRect = rect();
     QRectF tempTempRect = tempRect;
 
-    float minSize = 10;
-
-//    if( QApplication::keyboardModifiers() && Qt::ControlModifier){
-//        auto corner_type = owner->getCornerType();
-//        if(corner_type == TopLeft || corner_type == TopRight || corner_type == BottomLeft || corner_type == BottomRight)
-//        {
-//            bool x_sign = dx >= 0;
-//            bool y_sign = dy >= 0;
-//            auto dc = qMax(qAbs(dx), qAbs(dy));
-//            dx = x_sign ? dc : -dc;
-//            dy = y_sign ? dc : -dc;
-//            qDebug() << dx << " " << dy;
-//            auto max_size = qMax(tempRect.width(), tempRect.height());
-//            auto x = tempRect.x();
-//            auto y = tempRect.y();
-//            //tempRect.setWidth(max_size);
-//            //tempRect.setHeight(max_size);
-//            tempRect.setSize(QSizeF(max_size, max_size));
-//            //tempRect.setX(x);
-//            //tempRect.setY(y);
-//        }
-//    }
+    float minSize = 1;
 
     switch(owner->getCornerType()){
     case Top: {
@@ -257,9 +246,11 @@ void EllipseItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 }
 
     prepareGeometryChange();
-    setRect( tempRect );
+    setRect(QRectF(0,0,tempRect.width(), tempRect.height()));
+    setPos(QPointF(tempRect.x(), tempRect.y()) + pos());
     update();
     updateCornersPosition();
+    qDebug() << this->rect() << " " << this->pos();
 }
 
 //=========================================================================================================

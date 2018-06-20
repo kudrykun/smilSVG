@@ -20,9 +20,10 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
 
     document = new SvgDocument(QRectF(350,350,1000,1000));
     connect(this, SIGNAL(updateDocumentScale(qreal)), document, SLOT(setScaleFactor(qreal)));
-    RectItem *rect = new RectItem(QRectF(300,300,400,400));
-    EllipseItem *ellipse = new EllipseItem(QRectF(700,300,500,500));
-    LineItem *line = new LineItem(QLineF(600,200,1100,700));
+    RectItem *rect = new RectItem(QRectF(0,0,400,400));
+    rect->setPos(300,300);
+    EllipseItem *ellipse = new EllipseItem(QRectF(0,0,500,500));
+    LineItem *line = new LineItem(QLineF(0,0,1100,700));
 
     this->addItem(document);
     this->addItem(rect);

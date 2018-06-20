@@ -16,6 +16,16 @@ LineItem::LineItem(const QLineF &line) : QGraphicsLineItem(line)
 }
 
 //=========================================================================================================
+LineItem *LineItem::copy()
+{
+    LineItem *newItem = new LineItem(this->line());
+    newItem->setPen(this->getPen());
+    newItem->setPos(this->pos());
+
+    return newItem;
+}
+
+//=========================================================================================================
 QRectF LineItem::boundingRect() const
 {
     QRectF rect = QRectF(this->line().p1(),this->line().p2()).normalized();

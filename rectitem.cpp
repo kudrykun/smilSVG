@@ -17,6 +17,17 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
 }
 
 //=========================================================================================================
+RectItem *RectItem::copy()
+{
+    RectItem *newItem = new RectItem(this->rect());
+    qDebug() << this->rect();
+    newItem->setPen(this->getPen());
+    newItem->setBrush(this->getBrush());
+    newItem->setPos(this->pos());
+    return newItem;
+}
+
+//=========================================================================================================
 QRectF RectItem::boundingRect() const
 {
     QRectF rect = this->rect();
@@ -169,27 +180,6 @@ void RectItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 
     float minSize = 10;
 
-//    if( QApplication::keyboardModifiers() && Qt::ControlModifier){
-//        auto corner_type = owner->getCornerType();
-//        if(corner_type == TopLeft || corner_type == TopRight || corner_type == BottomLeft || corner_type == BottomRight)
-//        {
-//            bool x_sign = dx >= 0;
-//            bool y_sign = dy >= 0;
-//            auto dc = qMax(qAbs(dx), qAbs(dy));
-//            dx = x_sign ? dc : -dc;
-//            dy = y_sign ? dc : -dc;
-//            qDebug() << dx << " " << dy;
-//            auto max_size = qMax(tempRect.width(), tempRect.height());
-//            auto x = tempRect.x();
-//            auto y = tempRect.y();
-//            //tempRect.setWidth(max_size);
-//            //tempRect.setHeight(max_size);
-//            tempRect.setSize(QSizeF(max_size, max_size));
-//            //tempRect.setX(x);
-//            //tempRect.setY(y);
-//        }
-//    }
-
     switch(owner->getCornerType()){
     case Top: {
         tempTempRect.setTop(tempTempRect.top()+dy);
@@ -224,6 +214,7 @@ void RectItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
         break;
     }
 }
+
     switch(owner->getCornerType())
 {
     case Top: {
@@ -277,9 +268,11 @@ void RectItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 }
 
     prepareGeometryChange();
-    setRect( tempRect );
+    setRect(QRectF(0,0,tempRect.width(), tempRect.height()));
+    setPos(QPointF(tempRect.x(), tempRect.y()) + pos());
     update();
     updateCornersPosition();
+    qDebug() << this->rect() << " " << this->pos();
 }
 
 //=========================================================================================================
@@ -311,6 +304,7 @@ void RectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
     if(isSelected()){
         auto d = ev->pos() - previous_pos;
         this->moveBy(d.x(), d.y());
+        qDebug() << this->rect() << " " << this->pos();
     }
     QGraphicsItem::mouseMoveEvent(ev);
 }
