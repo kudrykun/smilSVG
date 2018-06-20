@@ -7,6 +7,7 @@
 #include "editorview.h"
 #include <QShortcut>
 #include <QActionGroup>
+#include "rightsidebar.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,6 +40,7 @@ private:
     void createItemsActionGroup();
     void createEditionActionGroup();
     void createItemsToolbar();
+    void createRightSideBar();
 private:
     Ui::MainWindow *ui;
 
@@ -49,6 +51,8 @@ private:
 
     QActionGroup *itemsActionGroup;
     QActionGroup *editionActionGroup;
+
+    RightSideBar *rightBar;
 };
 
 #endif // MAINWINDOW_H

@@ -11,6 +11,7 @@ EditorView::EditorView(EditorScene *scene, QObject *parent)
     setRenderHint(QPainter::RenderHint::Antialiasing);
     setScene(scene);
     connect(this, SIGNAL(scaleChanged(qreal)), scene, SLOT(updateScale(qreal)));
+    setDragMode(QGraphicsView::RubberBandDrag);
     //setMouseTracking(true);
 }
 
@@ -131,7 +132,23 @@ void EditorView::mouseMoveEvent(QMouseEvent *ev)
                     scene()->removeItem(drawing_item);
                 drawing_item = new RectItem(QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized());
                 scene()->addItem(drawing_item);
-                //QGraphicsView::mouseMoveEvent(ev);
+
+                return;
+            }
+
+            case EllipseTool:{
+                if(drawing_item != 0)
+                    scene()->removeItem(drawing_item);
+                drawing_item = new EllipseItem(QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized());
+                scene()->addItem(drawing_item);
+                return;
+            }
+
+            case LineTool:{
+                if(drawing_item != 0)
+                    scene()->removeItem(drawing_item);
+                drawing_item = new LineItem(QLineF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())));
+                scene()->addItem(drawing_item);
                 return;
             }
         }
@@ -150,16 +167,8 @@ void EditorView::mouseMoveEvent(QMouseEvent *ev)
 void EditorView::mouseReleaseEvent(QMouseEvent *ev)
 {
     if(item_tool_state != None && lmb_pressed){
-        switch(item_tool_state)
-        {
-            case RectTool:{
-                if(drawing_item != 0){
-                    drawing_item = nullptr;
-                    //QGraphicsView::mouseMoveEvent(ev);
-
-                }
-            }
-        }
+        if(drawing_item != 0)
+            drawing_item = nullptr;
     }
 
     if(ev->button() == Qt::LeftButton)

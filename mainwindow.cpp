@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QSignalMapper>
 #include <QVBoxLayout>
+#include <QLabel>
+#include <QGroupBox>
 
 //=========================================================================================================
 MainWindow::MainWindow(QWidget *parent) :
@@ -32,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->createItemsActionGroup();
     this->createEditionActionGroup();
     this->createItemsToolbar();
+    this->createRightSideBar();
 }
 
 //=========================================================================================================
@@ -117,6 +120,10 @@ void MainWindow::createEditionActionGroup()
 void MainWindow::createItemsToolbar()
 {
    QToolBar *itemBar = new QToolBar("Items Toolbar", this);
+   auto label = new QLabel("Items", itemBar);
+   label->setAlignment(Qt::AlignCenter);
+   itemBar->addWidget(label);
+   itemBar->addSeparator();
    for(auto &tool : itemsActionGroup->actions())
        itemBar->addAction(tool);
 
@@ -124,4 +131,12 @@ void MainWindow::createItemsToolbar()
        itemBar->addAction(tool);
 
    this->addToolBar(Qt::LeftToolBarArea, itemBar);
+}
+
+//=========================================================================================================
+void MainWindow::createRightSideBar()
+{
+    rightBar = new RightSideBar(RightSideBar::Line, this);
+
+    this->addToolBar(Qt::RightToolBarArea, rightBar);
 }
