@@ -40,7 +40,7 @@ private:
     void createItemsActionGroup();
     void createEditionActionGroup();
     void createItemsToolbar();
-    void createRightSideBar();
+    void createRightSideBar(RightSideBar::ShowMode mode);
 private:
     Ui::MainWindow *ui;
 
@@ -52,7 +52,7 @@ private:
     QActionGroup *itemsActionGroup;
     QActionGroup *editionActionGroup;
 
-    RightSideBar *rightBar;
+    RightSideBar *rightBar = nullptr;
 };
 
 #endif // MAINWINDOW_H

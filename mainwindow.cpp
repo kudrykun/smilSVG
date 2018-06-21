@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->createItemsActionGroup();
     this->createEditionActionGroup();
     this->createItemsToolbar();
-    this->createRightSideBar();
+    this->createRightSideBar(RightSideBar::Rect);
 }
 
 //=========================================================================================================
@@ -134,9 +134,14 @@ void MainWindow::createItemsToolbar()
 }
 
 //=========================================================================================================
-void MainWindow::createRightSideBar()
+void MainWindow::createRightSideBar(RightSideBar::ShowMode mode)
 {
-    rightBar = new RightSideBar(RightSideBar::Line, this);
+    if(rightBar != nullptr){
+        this->removeToolBar(rightBar);
+        rightBar = nullptr;
+    }
+
+    rightBar = new RightSideBar(mode, this);
 
     this->addToolBar(Qt::RightToolBarArea, rightBar);
 }

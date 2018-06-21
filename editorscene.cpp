@@ -18,6 +18,8 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
     current_scale = 1;
     setSceneRect(0,0,2000,2000);
 
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
+
     document = new SvgDocument(QRectF(350,350,1000,1000));
     connect(this, SIGNAL(updateDocumentScale(qreal)), document, SLOT(setScaleFactor(qreal)));
     RectItem *rect = new RectItem(QRectF(0,0,400,400));
@@ -65,6 +67,12 @@ void EditorScene::ungroupAction()
         if(grouppingItem != 0)
             this->destroyItemGroup(grouppingItem);
     }
+}
+
+//=========================================================================================================
+void EditorScene::onSelectionChanged()
+{
+
 }
 
 //=========================================================================================================

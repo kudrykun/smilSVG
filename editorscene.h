@@ -20,6 +20,8 @@ public slots:
     void updateScale(qreal scale);
     void groupAction();
     void ungroupAction();
+
+    void onSelectionChanged();
 protected:
     //переопределнный метод, используемый для отрисовки сетки
     void drawBackground(QPainter *painter, const QRectF &rect);
