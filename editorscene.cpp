@@ -1,4 +1,5 @@
 #include "editorscene.h"
+#include "mainwindow.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 #include <QPainter>
@@ -72,7 +73,39 @@ void EditorScene::ungroupAction()
 //=========================================================================================================
 void EditorScene::onSelectionChanged()
 {
+    auto items = this->selectedItems();
+    if(items.size() == 1){
+        bool flag = false;
+        if(!flag){
+            RectItem* new_item = dynamic_cast<RectItem*>(items.at(0));
+            if(new_item != 0)
+            {
+                MainWindow* main_w = dynamic_cast<MainWindow*>(this->parent());
+                if(main_w != nullptr)
+                    main_w->createRightSideBar(new_item);
+            }
+        }
 
+        if(!flag){
+            EllipseItem* new_item = dynamic_cast<EllipseItem*>(items.at(0));
+            if(new_item != 0)
+            {
+                MainWindow* main_w = dynamic_cast<MainWindow*>(this->parent());
+                if(main_w != nullptr)
+                    main_w->createRightSideBar(new_item);
+            }
+        }
+
+        if(!flag){
+            LineItem* new_item = dynamic_cast<LineItem*>(items.at(0));
+            if(new_item != 0)
+            {
+                MainWindow* main_w = dynamic_cast<MainWindow*>(this->parent());
+                if(main_w != nullptr)
+                    main_w->createRightSideBar(new_item);
+            }
+        }
+    }
 }
 
 //=========================================================================================================

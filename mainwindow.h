@@ -22,6 +22,7 @@ public:
     ~MainWindow();
 
     EditorScene* getMainScene() {return scene;}
+    void createRightSideBar(QGraphicsItem *item = nullptr);
 
 signals:
     void groupAction();
@@ -40,7 +41,6 @@ private:
     void createItemsActionGroup();
     void createEditionActionGroup();
     void createItemsToolbar();
-    void createRightSideBar(RightSideBar::ShowMode mode);
 private:
     Ui::MainWindow *ui;
 

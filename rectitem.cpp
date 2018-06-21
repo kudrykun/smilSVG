@@ -70,17 +70,6 @@ void RectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget)
 }
 
-//=========================================================================================================
-void RectItem::setPen(const QPen &pen)
-{
-    currentPen = pen;
-}
-
-//=========================================================================================================
-void RectItem::setBrush(const QBrush &brush)
-{
-    currentBrush = brush;
-}
 
 //=========================================================================================================
 QPen RectItem::getPen()
@@ -92,78 +81,6 @@ QPen RectItem::getPen()
 QBrush RectItem::getBrush()
 {
     return currentBrush;
-}
-
-//=========================================================================================================
-void RectItem::setStrokeWidth(float w)
-{
-    currentPen.setWidthF(w);
-}
-
-//=========================================================================================================
-void RectItem::setStrokeOpacity(float op)
-{
-    if(op < 0)
-        op = 0;
-    if(op > 1)
-        op = 1;
-    auto new_color = currentPen.color();
-    new_color.setAlphaF(op);
-    currentPen.setColor(new_color);
-}
-
-//=========================================================================================================
-void RectItem::setStrokeColor(QColor stroke_color)
-{
-    auto new_color = stroke_color;
-    new_color.setAlpha(currentPen.color().alpha());
-    currentPen.setColor(new_color);
-}
-
-
-//=========================================================================================================
-void RectItem::setStrokeLineCap(Qt::PenCapStyle capStyle)
-{
-    currentPen.setCapStyle(capStyle);
-}
-
-//=========================================================================================================
-void RectItem::setStrokeLineJoin(Qt::PenJoinStyle joinStyle)
-{
-    currentPen.setJoinStyle(joinStyle);
-}
-
-//=========================================================================================================
-void RectItem::setStrokeDashoffset(qreal offset)
-{
-    if(offset >= 0)
-        currentPen.setDashOffset(offset);
-}
-
-//=========================================================================================================
-void RectItem::setStrokeDasharray(const QVector<qreal> &pattern)
-{
-    if(!pattern.empty())
-        currentPen.setDashPattern(pattern);
-}
-
-//=========================================================================================================
-void RectItem::setR(float r)
-{
-   this->rx = r;
-   this->ry = r;
-}
-
-//=========================================================================================================
-void RectItem::setRx(float rx)
-{
-    this->rx = rx;
-}
-
-//=========================================================================================================
-void RectItem::setRy(float ry)
-{
-    this->ry = ry;
 }
 
 //=========================================================================================================
@@ -272,7 +189,54 @@ void RectItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     setPos(QPointF(tempRect.x(), tempRect.y()) + pos());
     update();
     updateCornersPosition();
-    qDebug() << this->rect() << " " << this->pos();
+
+//    emit xChangedSignal(pos().x());
+//    emit yChangedSignal(pos().y());
+//    emit wChangedSignal(tempRect.width());
+//    emit hChangedSignal(tempRect.height());
+}
+
+void RectItem::posChanged(QPointF pos)
+{
+    this->setPos(pos);
+    qDebug() << "POS CHANGED";
+}
+
+void RectItem::rectChanged(int x, int y)
+{
+    auto rect = this->rect();
+    qDebug() << rect;
+    rect.setWidth(x);
+    rect.setHeight(y);
+    this->setRect(rect);
+    qDebug() << "RECT CHANGED " << rect;
+    update();
+    updateCornersPosition();
+}
+
+void RectItem::strokeColorChanged(QColor c)
+{
+    currentPen.setColor(c);
+    update();
+}
+
+void RectItem::fillColorChanged(QColor c)
+{
+    currentBrush.setColor(c);
+    update();
+}
+
+void RectItem::strokeWidthChanged(int w)
+{
+    currentPen.setWidth(w);
+    update();
+}
+
+void RectItem::cornerRadChanged(int rx, int ry)
+{
+    this->rx = rx;
+    this->ry = ry;
+    update();
 }
 
 //=========================================================================================================
@@ -304,7 +268,10 @@ void RectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
     if(isSelected()){
         auto d = ev->pos() - previous_pos;
         this->moveBy(d.x(), d.y());
+        emit xChangedSignal(pos().x());
+        emit yChangedSignal(pos().y());
         qDebug() << this->rect() << " " << this->pos();
+
     }
     QGraphicsItem::mouseMoveEvent(ev);
 }

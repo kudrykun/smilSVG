@@ -29,25 +29,31 @@ public:
     RectItem* copy();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    void setPen(const QPen &pen);
-    void setBrush(const QBrush &brush);
     QPen getPen();
     QBrush getBrush();
-    void setStrokeWidth(float w);
-    void setStrokeOpacity(float op);
-    void setStrokeColor(QColor stroke_color);
-    void setStrokeLineCap(Qt::PenCapStyle capStyle);
-    void setStrokeLineJoin(Qt::PenJoinStyle joinStyle);
-    void setStrokeDashoffset(qreal offset);
-    void setStrokeDasharray(const QVector<qreal> & pattern);
-    void setR(float r);
-    void setRx(float rx);
-    void setRy(float ry);
+    float getRx() {return rx;}
+    float getRy() {return ry;}
+
+signals:
+    void xChangedSignal(int v);
+    void yChangedSignal(int v);
+    void wChangedSignal(int v);
+    void hChangedSignal(int v);
+    void strokeColorChangeSignal(QColor c);
+    void fillColorChangedSignal(QColor c);
+    void strokeWidthChangedSignal(int w);
+    void cornerRadChangedSignal(int rx, int ry);
 
 public slots:
     void setScaleFactor(qreal factor);
     void cornerMove(GrabbingCorner *owner, qreal dx, qreal dy);
+
+    void posChanged(QPointF pos);
+    void rectChanged(int x, int y);
+    void strokeColorChanged(QColor c);
+    void fillColorChanged(QColor c);
+    void strokeWidthChanged(int w);
+    void cornerRadChanged(int rx, int ry);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
