@@ -50,6 +50,7 @@ private:
 
     ItemToolState item_tool_state = None;
     QGraphicsItem *drawing_item;
+    QRectF drawing_rect;
 };
 
 #endif // EDITORVIEW_H

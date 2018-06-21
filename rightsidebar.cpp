@@ -72,7 +72,7 @@ void RightSideBar::itemStrokeColorEdited()
         setupAppearencePropBox(showMode);
         appearencePropTemp = this->addWidget(appearenceProp);
 
-        emit setStrokeOpacitySignal(QString::number(color.alpha()));
+        emit setStrokeOpacitySignal(color.alpha());
 
         if(rect_item != nullptr)
             rect_item->strokeColorChanged(color);
@@ -90,7 +90,7 @@ void RightSideBar::itemFillColorEdited()
         setupAppearencePropBox(showMode);
         appearencePropTemp = this->addWidget(appearenceProp);
 
-        emit setFillOpacitySignal(QString::number(color.alpha()));
+        emit setFillOpacitySignal(color.alpha());
 
         if(rect_item != nullptr)
             rect_item->fillColorChanged(color);
@@ -98,17 +98,17 @@ void RightSideBar::itemFillColorEdited()
 }
 
 //=========================================================================================================
-void RightSideBar::itemStrokeOpacityEdited(QString op)
+void RightSideBar::itemStrokeOpacityEdited(int v)
 {
-    item_stroke_color.setAlpha(op.toInt());
+    item_stroke_color.setAlpha(v);
     if(rect_item != nullptr)
         rect_item->strokeColorChanged(item_stroke_color);
 }
 
 //=========================================================================================================
-void RightSideBar::itemFillOpacityEdited(QString op)
+void RightSideBar::itemFillOpacityEdited(int v)
 {
-    item_fill_color.setAlpha(op.toInt());
+    item_fill_color.setAlpha(v);
     if(rect_item != nullptr)
         rect_item->fillColorChanged(item_fill_color);
 
@@ -126,9 +126,11 @@ void RightSideBar::itemStrokeWEdited(int v)
 void RightSideBar::itemXEdited(int op)
 {
     item_x = op;
-
-    if(rect_item != nullptr)
-        rect_item->posChanged(QPointF(item_x, item_y));
+    QSpinBox* new_item = dynamic_cast<QSpinBox*>(QObject::sender());
+    if(new_item->hasFocus()){
+        if(rect_item != nullptr)
+            rect_item->xChanged(item_x);
+    }
 
 }
 
@@ -136,9 +138,11 @@ void RightSideBar::itemXEdited(int op)
 void RightSideBar::itemYEdited(int op)
 {
     item_y = op;
-
-    if(rect_item != nullptr)
-        rect_item->posChanged(QPointF(item_x, item_y));
+    QSpinBox* new_item = dynamic_cast<QSpinBox*>(QObject::sender());
+    if(new_item->hasFocus()){
+        if(rect_item != nullptr)
+            rect_item->yChanged(item_y);
+    }
 }
 
 void RightSideBar::itemX1Edited(int v)
@@ -180,17 +184,22 @@ void RightSideBar::itemRYEdited(int v)
 void RightSideBar::itemWEdited(int v)
 {
     item_w = v;
-
-    if(rect_item != nullptr)
-        rect_item->rectChanged(item_w,item_h);
+    QSpinBox* new_item = dynamic_cast<QSpinBox*>(QObject::sender());
+    if(new_item->hasFocus()){
+        if(rect_item != nullptr)
+            rect_item->wChanged(item_w);
+        qDebug() << "W_EDITED";
+    }
 }
 
 void RightSideBar::itemHEdited(int v)
 {
     item_h = v;
-
-    if(rect_item != nullptr)
-        rect_item->rectChanged(item_w,item_h);
+    QSpinBox* new_item = dynamic_cast<QSpinBox*>(QObject::sender());
+    if(new_item->hasFocus()){
+        if(rect_item != nullptr)
+            rect_item->hChanged(item_h);
+    }
 }
 
 //=========================================================================================================
@@ -398,6 +407,8 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
     if(mode == Rect){
         QHBoxLayout *stroke_layout = new QHBoxLayout();
 
+
+
         QLabel *stroke_label = new QLabel("Stroke");
         stroke_layout->addWidget(stroke_label);
 
@@ -407,18 +418,22 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
         stroke_layout->addWidget(stroke_color);
 
         QLabel *stroke_w_label = new QLabel("w");
-        QLineEdit *stroke_w_edit = new QLineEdit(QString::number(item_stroke_w));
-        stroke_w_edit->setValidator(new QIntValidator(0,10000));
-        connect(stroke_w_edit, SIGNAL(textEdited(QString)), this, SLOT(itemStrokeWEdited(QString)));
         stroke_layout->addWidget(stroke_w_label);
+
+        QSpinBox *stroke_w_edit = new QSpinBox();
+        stroke_w_edit->setRange(0, 10000);
+        stroke_w_edit->setValue(item_stroke_w);
+        connect(stroke_w_edit, SIGNAL(valueChanged(int)), this, SLOT(itemStrokeWEdited(int)));
         stroke_layout->addWidget(stroke_w_edit);
 
         QLabel *stroke_op_label = new QLabel("opacity");
-        QLineEdit *stroke_op_edit = new QLineEdit(QString::number(item_stroke_color.alpha()));
-        stroke_op_edit->setValidator(new QIntValidator(0,255));
-        connect(this, SIGNAL(setStrokeOpacitySignal(QString)), stroke_op_edit, SLOT(setText(QString)));
-        connect(stroke_op_edit, SIGNAL(textEdited(QString)), this, SLOT(itemStrokeOpacityEdited(QString)));
         stroke_layout->addWidget(stroke_op_label);
+
+        QSpinBox *stroke_op_edit = new QSpinBox();
+        stroke_op_edit->setRange(0, 255);
+        stroke_op_edit->setValue(item_stroke_color.alpha());
+        connect(this, SIGNAL(setStrokeOpacitySignal(int)), stroke_op_edit, SLOT(setValue(int)));
+        connect(stroke_op_edit, SIGNAL(valueChanged(int)), this, SLOT(itemStrokeOpacityEdited(int)));
         stroke_layout->addWidget(stroke_op_edit);
 
         layout->addItem(stroke_layout,0,0);
@@ -435,11 +450,13 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
         fill_layout->addWidget(fill_color);
 
         QLabel *fill_op_label = new QLabel("opacity");
-        QLineEdit *fill_op_edit = new QLineEdit(QString::number(item_fill_color.alpha()));
-        fill_op_edit->setValidator(new QIntValidator(0,255));
-        connect(this, SIGNAL(setFillOpacitySignal(QString)), fill_op_edit, SLOT(setText(QString)));
-        connect(fill_op_edit, SIGNAL(textEdited(QString)), this, SLOT(itemFillOpacityEdited(QString)));
         fill_layout->addWidget(fill_op_label);
+
+        QSpinBox *fill_op_edit = new QSpinBox();
+        fill_op_edit->setRange(0, 255);
+        fill_op_edit->setValue(item_fill_color.alpha());
+        connect(this, SIGNAL(setFillOpacitySignal(int)), fill_op_edit, SLOT(setValue(int)));
+        connect(fill_op_edit, SIGNAL(valueChanged(int)), this, SLOT(itemFillOpacityEdited(int)));
         fill_layout->addWidget(fill_op_edit);
 
         layout->addItem(fill_layout,1,0);
@@ -448,17 +465,21 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
         QHBoxLayout *r_layout = new QHBoxLayout();
 
         QLabel *rx_label = new QLabel("rx");
-        QLineEdit *rx_edit = new QLineEdit(QString::number(item_rx));
-        rx_edit->setValidator(new QIntValidator(0,1000));
-        connect(rx_edit, SIGNAL(textEdited(QString)), this, SLOT(itemRXEdited(QString)));
         r_layout->addWidget(rx_label);
+
+        QSpinBox *rx_edit = new QSpinBox();
+        rx_edit->setRange(0, 10000);
+        rx_edit->setValue(item_rx);
+        connect(rx_edit, SIGNAL(valueChanged(int)), this, SLOT(itemRXEdited(int)));
         r_layout->addWidget(rx_edit);
 
         QLabel *ry_label = new QLabel("ry");
-        QLineEdit *ry_edit = new QLineEdit(QString::number(item_ry));
-        ry_edit->setValidator(new QIntValidator(0,1000));
-        connect(ry_edit, SIGNAL(textEdited(QString)), this, SLOT(itemRYEdited(QString)));
         r_layout->addWidget(ry_label);
+
+        QSpinBox *ry_edit = new QSpinBox();
+        ry_edit->setRange(0, 10000);
+        ry_edit->setValue(item_ry);
+        connect(ry_edit, SIGNAL(valueChanged(int)), this, SLOT(itemRYEdited(int)));
         r_layout->addWidget(ry_edit);
 
         layout->addItem(r_layout,2,0);

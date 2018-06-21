@@ -48,8 +48,10 @@ public slots:
     void setScaleFactor(qreal factor);
     void cornerMove(GrabbingCorner *owner, qreal dx, qreal dy);
 
-    void posChanged(QPointF pos);
-    void rectChanged(int x, int y);
+    void xChanged(int v);
+    void yChanged(int v);
+    void wChanged(int v);
+    void hChanged(int v);
     void strokeColorChanged(QColor c);
     void fillColorChanged(QColor c);
     void strokeWidthChanged(int w);

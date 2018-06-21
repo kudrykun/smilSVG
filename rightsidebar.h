@@ -27,15 +27,15 @@ public:
     ShowMode getShowMode() {return showMode;}
 
 signals:
-    void setStrokeOpacitySignal(QString op);
-    void setFillOpacitySignal(QString op);
+    void setStrokeOpacitySignal(int v);
+    void setFillOpacitySignal(int v);
 
 public slots:
     void itemStrokeColorEdited();
     void itemFillColorEdited();
 
-    void itemStrokeOpacityEdited(QString v);
-    void itemFillOpacityEdited(QString v);
+    void itemStrokeOpacityEdited(int v);
+    void itemFillOpacityEdited(int v);
     void itemStrokeWEdited(int v);
     void itemXEdited(int v);
     void itemYEdited(int v);

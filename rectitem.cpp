@@ -190,26 +190,38 @@ void RectItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     update();
     updateCornersPosition();
 
-//    emit xChangedSignal(pos().x());
-//    emit yChangedSignal(pos().y());
-//    emit wChangedSignal(tempRect.width());
-//    emit hChangedSignal(tempRect.height());
+    emit wChangedSignal(tempRect.width());
+    emit hChangedSignal(tempRect.height());
+    emit xChangedSignal(pos().x());
+    emit yChangedSignal(pos().y());
 }
 
-void RectItem::posChanged(QPointF pos)
+void RectItem::xChanged(int v)
 {
-    this->setPos(pos);
-    qDebug() << "POS CHANGED";
+    this->setPos(v, pos().y());
 }
 
-void RectItem::rectChanged(int x, int y)
+void RectItem::yChanged(int v)
+{
+    this->setPos(pos().x(), v);
+}
+
+void RectItem::wChanged(int v)
+{
+    auto rect = this->rect();
+    qDebug() << "W_CHANGED";
+    rect.setWidth(v);
+    this->setRect(rect);
+    update();
+    updateCornersPosition();
+}
+
+void RectItem::hChanged(int v)
 {
     auto rect = this->rect();
     qDebug() << rect;
-    rect.setWidth(x);
-    rect.setHeight(y);
+    rect.setHeight(v);
     this->setRect(rect);
-    qDebug() << "RECT CHANGED " << rect;
     update();
     updateCornersPosition();
 }
@@ -230,6 +242,7 @@ void RectItem::strokeWidthChanged(int w)
 {
     currentPen.setWidth(w);
     update();
+    updateCornersPosition();
 }
 
 void RectItem::cornerRadChanged(int rx, int ry)

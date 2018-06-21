@@ -130,7 +130,9 @@ void EditorView::mouseMoveEvent(QMouseEvent *ev)
             case RectTool:{
                 if(drawing_item != 0)
                     scene()->removeItem(drawing_item);
-                drawing_item = new RectItem(QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized());
+                drawing_rect = QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized();
+                drawing_item = new RectItem(QRectF(0,0,drawing_rect.width(),drawing_rect.height()));
+                drawing_item->setPos(drawing_rect.x(),drawing_rect.y());
                 scene()->addItem(drawing_item);
 
                 return;
@@ -139,7 +141,9 @@ void EditorView::mouseMoveEvent(QMouseEvent *ev)
             case EllipseTool:{
                 if(drawing_item != 0)
                     scene()->removeItem(drawing_item);
-                drawing_item = new EllipseItem(QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized());
+                drawing_rect = QRectF(this->mapToScene(previous_mouse_pos.toPoint()), this->mapToScene(ev->pos())).normalized();
+                drawing_item = new EllipseItem(QRectF(0,0,drawing_rect.width(),drawing_rect.height()));
+                drawing_item->setPos(drawing_rect.x(),drawing_rect.y());
                 scene()->addItem(drawing_item);
                 return;
             }
@@ -167,8 +171,11 @@ void EditorView::mouseMoveEvent(QMouseEvent *ev)
 void EditorView::mouseReleaseEvent(QMouseEvent *ev)
 {
     if(item_tool_state != None && lmb_pressed){
-        if(drawing_item != 0)
+        if(drawing_item != 0){
+            if(item_tool_state != LineTool)
+                drawing_item->setPos(drawing_rect.x(), drawing_rect.y());
             drawing_item = nullptr;
+        }
     }
 
     if(ev->button() == Qt::LeftButton)

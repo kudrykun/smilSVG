@@ -68,7 +68,7 @@ private:
     unsigned int current_corner;
     QPointF previous_pos;
 
-    bool debug_mode = true;
+    bool debug_mode = false;
 };
 
 #endif // ELLIPSEITEM_H
