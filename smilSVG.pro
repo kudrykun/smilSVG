@@ -34,7 +34,8 @@ SOURCES += \
     ellipseitem.cpp \
     grouppingitem.cpp \
     lineitem.cpp \
-    rightsidebar.cpp
+    rightsidebar.cpp \
+    animatetag.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -46,7 +47,8 @@ HEADERS += \
     ellipseitem.h \
     grouppingitem.h \
     lineitem.h \
-    rightsidebar.h
+    rightsidebar.h \
+    animatetag.h
 
 FORMS += \
         mainwindow.ui

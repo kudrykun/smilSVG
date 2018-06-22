@@ -14,6 +14,34 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
     setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
+    connect(this, SIGNAL(animationXChangedSignal(int)),this, SLOT(xChanged(int)));
+
+    for(int i = 0; i < 4; i++){
+
+        AnimateTag *animation = new AnimateTag(this, "x");
+        animation->setDuration(1000);
+        animation->setLoopCount(10);
+        animation->setStartValue(0);
+        animation->setEndValue(1000);
+
+        //animation->start();
+
+        animations.push_back(animation);
+    }
+
+    //Задаем доступные attrname для этой фигуры
+    {
+        animAttributesNames.push_back("x");
+        animAttributesNames.push_back("y");
+        animAttributesNames.push_back("w");
+        animAttributesNames.push_back("h");
+        animAttributesNames.push_back("strokeColor");
+        animAttributesNames.push_back("strokeOpacity");
+        animAttributesNames.push_back("fillColor");
+        animAttributesNames.push_back("fillOpacity");
+        animAttributesNames.push_back("rx");
+        animAttributesNames.push_back("ry");
+    }
 }
 
 //=========================================================================================================
@@ -81,6 +109,18 @@ QPen RectItem::getPen()
 QBrush RectItem::getBrush()
 {
     return currentBrush;
+}
+
+//=========================================================================================================
+void RectItem::addAnimation()
+{
+    AnimateTag *animation = new AnimateTag(this, "x");
+    animation->setDuration(1000);
+    animation->setLoopCount(10);
+    animation->setStartValue(0);
+    animation->setEndValue(1000);
+
+    animations.push_back(animation);
 }
 
 //=========================================================================================================
@@ -199,6 +239,8 @@ void RectItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
 void RectItem::xChanged(int v)
 {
     this->setPos(v, pos().y());
+    x = v;
+    qDebug() << "X_CHANGED!";
 }
 
 void RectItem::yChanged(int v)

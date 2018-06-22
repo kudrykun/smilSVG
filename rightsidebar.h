@@ -7,6 +7,8 @@
 #include "rectitem.h"
 #include "ellipseitem.h"
 #include "lineitem.h"
+#include <QToolBox>
+#include "animatetag.h"
 
 class RightSideBar : public QToolBar
 {
@@ -48,9 +50,14 @@ public slots:
     void itemWEdited(int v);
     void itemHEdited(int v);
 
+    void addAnimationToItemSlot();
+
 private:
     void setupPositionPropBox(ShowMode mode);
     void setupAppearencePropBox(ShowMode mode);
+    void setupAnimationPropBox(ShowMode mode);
+
+    QWidget *createAnimWidget(AnimateTag* a);
 
 private:
     RectItem *rect_item = nullptr;
@@ -62,6 +69,8 @@ private:
     QAction *positionPropTemp = nullptr;
     QGroupBox *appearenceProp = nullptr;
     QAction *appearencePropTemp = nullptr;
+    QGroupBox *animationsProp = nullptr;
+    QAction *animationsPropTemp = nullptr;
 
     int item_x = -1;
     int item_y = -1;
@@ -77,6 +86,7 @@ private:
     QColor item_stroke_color = QColor(255,0,0);
     QColor item_fill_color = QColor(255,0,0);
 
+    QToolBox *toolBox;
 };
 
 #endif // RIGHTSIDEBAR_H

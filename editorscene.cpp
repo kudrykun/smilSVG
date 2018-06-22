@@ -9,6 +9,7 @@
 #include "grouppingitem.h"
 #include "lineitem.h"
 #include <QGraphicsItemGroup>
+#include <QPropertyAnimation>
 
 
 //=========================================================================================================
@@ -33,6 +34,15 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
     this->addItem(rect);
     this->addItem(ellipse);
     this->addItem(line);
+
+//    QPropertyAnimation *animation = new QPropertyAnimation(rect, "x");
+//    animation->setDuration(1000);
+//    animation->setLoopCount(10);
+//    QRectF r = rect->rect();
+//    animation->setStartValue(0);
+//    animation->setEndValue(1000);
+
+//    animation->start();
     //this->drawTestFigures();
 }
 

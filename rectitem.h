@@ -8,10 +8,15 @@
 #include <QBrush>
 #include "grabbingcorner.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QDebug>
+#include <QPropertyAnimation>
+#include "animatetag.h"
+#include <QStringList>
 
 class RectItem : public  QObject, public QGraphicsRectItem
 {
     Q_OBJECT
+    Q_PROPERTY(int x READ getX WRITE setX NOTIFY animationXChangedSignal)
 public:
     enum Corners{
         Top = 0,
@@ -34,7 +39,17 @@ public:
     float getRx() {return rx;}
     float getRy() {return ry;}
 
+    QVector<AnimateTag*> getAnimations() {return animations;}
+    void addAnimation();
+    QStringList getAnimAttrNames() {return animAttributesNames;}
+
+    //это нужно для свойств анимаций
+    int getX(){return pos().x();}
+    void setX(int v) {x = v;emit animationXChangedSignal(v); emit xChangedSignal(v); qDebug() << "setX";}
+
 signals:
+    void animationXChangedSignal(int v);
+
     void xChangedSignal(int v);
     void yChangedSignal(int v);
     void wChangedSignal(int v);
@@ -85,6 +100,10 @@ private:
 
     float rx = 0;
     float ry = 0;
+    int x = 0;
+
+    QVector<AnimateTag*> animations;
+    QStringList animAttributesNames;
 };
 
 #endif // RECTITEM_H

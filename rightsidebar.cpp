@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QColorDialog>
 #include <QDebug>
+#include <QToolBox>
+#include <QComboBox>
 
 //=========================================================================================================
 RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(parent)
@@ -69,12 +71,19 @@ RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(pare
             }
         }
     }
+    else
+    {
+        showMode = None;
+    }
 
     setupPositionPropBox(showMode);
     positionPropTemp = this->addWidget(positionProp);
 
     setupAppearencePropBox(showMode);
     appearencePropTemp = this->addWidget(appearenceProp);
+
+    setupAnimationPropBox(showMode);
+    animationsPropTemp = this->addWidget(animationsProp);
 }
 
 //=========================================================================================================
@@ -252,6 +261,18 @@ void RightSideBar::itemHEdited(int v)
             rect_item->hChanged(item_h);
         if(ellipse_item != nullptr)
             ellipse_item->hChanged(item_h);
+    }
+}
+
+//=========================================================================================================
+void RightSideBar::addAnimationToItemSlot()
+{
+    if(rect_item != nullptr){
+        rect_item->addAnimation();
+        auto animation = rect_item->getAnimations().last();
+        auto widget = createAnimWidget(animation);
+        toolBox->addItem(widget, animation->getName());
+        toolBox->setCurrentWidget(widget);
     }
 }
 
@@ -632,4 +653,116 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
     }
 
     appearenceProp->setLayout(layout);
+}
+
+
+void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
+{
+    if(animationsProp != nullptr && animationsPropTemp != nullptr){
+        this->removeAction(animationsPropTemp);
+        animationsProp = nullptr;
+        animationsPropTemp = nullptr;
+    }
+
+    animationsProp = new QGroupBox("Animations", this);
+    animationsProp->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed));
+
+    QVBoxLayout *layout = new QVBoxLayout;
+
+    QPushButton *add_anim_btn = new QPushButton("Add animation");
+    layout->addWidget(add_anim_btn);
+
+    animationsProp->setLayout(layout);
+
+    toolBox = new QToolBox;
+    layout->addWidget(toolBox);
+
+    connect(add_anim_btn, &QAbstractButton::clicked, this, addAnimationToItemSlot);
+
+    if(mode == Rect)
+    {
+        for(auto animation : rect_item->getAnimations())
+            toolBox->addItem(createAnimWidget(animation), animation->getName());
+    }
+}
+
+
+QWidget *RightSideBar::createAnimWidget(AnimateTag *a)
+{
+    QWidget *anim_widget = new QWidget(); //контейнер для содержимоо вкладки
+    QVBoxLayout *anim_layout = new QVBoxLayout(anim_widget);
+    anim_widget->setLayout(anim_layout);
+
+    //Attribute name combobox
+    {
+        QHBoxLayout *layout = new QHBoxLayout;
+
+        QLabel *lbl = new QLabel("Attribute name");
+        layout->addWidget(lbl);
+
+        QComboBox *box = new QComboBox;
+        if(rect_item != nullptr)
+            box->addItems(rect_item->getAnimAttrNames());
+        box->setCurrentIndex(0);
+        connect(box, SIGNAL(currentTextChanged(QString)), a, SLOT(changedAttributeName(QString)));
+        layout->addWidget(box);
+
+        anim_layout->addLayout(layout);
+    }
+
+    //from and to
+    {
+        QHBoxLayout *layout = new QHBoxLayout;
+
+        QLabel *f_lbl = new QLabel("From");
+        layout->addWidget(f_lbl);
+
+        QSpinBox *f_edit = new QSpinBox();
+        f_edit->setRange(0, 10000);
+        f_edit->setValue(0);
+        connect(f_edit, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), a, &AnimateTag::changedFrom);
+        layout->addWidget(f_edit);
+
+        QLabel *t_lbl = new QLabel("To");
+        layout->addWidget(t_lbl);
+
+        QSpinBox *t_edit = new QSpinBox();
+        t_edit->setRange(0, 10000);
+        t_edit->setValue(0);
+        layout->addWidget(t_edit);
+
+        anim_layout->addLayout(layout);
+    }
+
+    //dur
+    {
+        QHBoxLayout *layout = new QHBoxLayout;
+
+        QLabel *lbl = new QLabel("Duration");
+        layout->addWidget(lbl);
+
+        QSpinBox *edit = new QSpinBox();
+        edit->setRange(0, 10000);
+        edit->setValue(0);
+        layout->addWidget(edit);
+
+        anim_layout->addLayout(layout);
+    }
+
+    //repeatCount
+    {
+        QHBoxLayout *layout = new QHBoxLayout;
+
+        QLabel *lbl = new QLabel("Repeat count");
+        layout->addWidget(lbl);
+
+        QSpinBox *edit = new QSpinBox();
+        edit->setRange(0, 10000);
+        edit->setValue(0);
+        layout->addWidget(edit);
+
+        anim_layout->addLayout(layout);
+    }
+
+    return anim_widget;
 }
