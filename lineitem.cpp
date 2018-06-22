@@ -6,7 +6,7 @@
 #include <QCursor>
 
 //=========================================================================================================
-LineItem::LineItem(const QLineF &line) : QGraphicsLineItem(line)
+LineItem::LineItem(const QLineF &line, QGraphicsItem* parent) : QGraphicsLineItem(line, parent)
 {
     setLine(line);
     setPen(currentPen);
@@ -157,6 +157,74 @@ void LineItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     setLine(line);
     update();
     updateCornersPosition();
+
+    emit x1ChangedSignal(line.p1().x());
+    emit y1ChangedSignal(line.p1().y());
+    emit x2ChangedSignal(line.p2().x());
+    emit y2ChangedSignal(line.p2().y());
+}
+
+//=========================================================================================================
+void LineItem::x1Changed(int v)
+{
+    auto line = this->line();
+    line.setP1(QPointF(v,line.p1().y()));
+    this->setLine(line);
+    update();
+    updateCornersPosition();
+
+    qDebug() << "LINE_CHANGED";
+}
+
+//=========================================================================================================
+void LineItem::y1Changed(int v)
+{
+    auto line = this->line();
+    line.setP1(QPointF(line.p1().x(),v));
+    this->setLine(line);
+    update();
+    updateCornersPosition();
+
+    qDebug() << "LINE_CHANGED";
+}
+
+//=========================================================================================================
+void LineItem::x2Changed(int v)
+{
+    auto line = this->line();
+    line.setP2(QPointF(v,line.p2().y()));
+    this->setLine(line);
+    update();
+    updateCornersPosition();
+
+    qDebug() << "LINE_CHANGED";
+}
+
+//=========================================================================================================
+void LineItem::y2Changed(int v)
+{
+    auto line = this->line();
+    line.setP2(QPointF(line.p2().x(),v));
+    this->setLine(line);
+    update();
+    updateCornersPosition();
+
+    qDebug() << "LINE_CHANGED";
+}
+
+//=========================================================================================================
+void LineItem::strokeColorChanged(QColor c)
+{
+    currentPen.setColor(c);
+    update();
+}
+
+//=========================================================================================================
+void LineItem::strokeWidthChanged(int w)
+{
+    currentPen.setWidth(w);
+    update();
+    updateCornersPosition();
 }
 
 //=========================================================================================================
@@ -187,7 +255,20 @@ void LineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
     if(isSelected()){
         auto d = ev->pos() - previous_pos;
-        this->moveBy(d.x(), d.y());
+        previous_pos = ev->pos();
+        qDebug() << d << " " << this->line();
+        //this->moveBy(d.x(), d.y());
+        auto line = this->line();
+        line.setP1(line.p1()+d);
+        line.setP2(line.p2()+d);
+        this->setLine(line);
+
+        emit x1ChangedSignal(line.p1().x());
+        emit y1ChangedSignal(line.p1().y());
+        emit x2ChangedSignal(line.p2().x());
+        emit y2ChangedSignal(line.p2().y());
+
+        updateCornersPosition();
     }
     QGraphicsItem::mouseMoveEvent(ev);
 }

@@ -26,7 +26,8 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
     RectItem *rect = new RectItem(QRectF(0,0,400,400));
     rect->setPos(300,300);
     EllipseItem *ellipse = new EllipseItem(QRectF(0,0,500,500));
-    LineItem *line = new LineItem(QLineF(0,0,1100,700));
+    LineItem *line = new LineItem(QLineF(0,0,1100,700), document);
+    line->setPos(QPointF(0,0));
 
     this->addItem(document);
     this->addItem(rect);

@@ -41,6 +41,15 @@ RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(pare
             {
                 qDebug() << "ELLIPSE";
                 showMode = Ellipse;
+                item_x = new_item->pos().x();
+                item_y = new_item->pos().y();
+
+                item_w = new_item->rect().width();
+                item_h = new_item->rect().height();
+                item_stroke_w = new_item->getPen().width();
+                item_stroke_color = new_item->getPen().color();
+                item_fill_color = new_item->getBrush().color();
+                this->ellipse_item = new_item;
             }
         }
 
@@ -50,6 +59,13 @@ RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(pare
             {
                 qDebug() << "LINE";
                 showMode = Line;
+                item_x1 = new_item->line().p1().x();
+                item_y1 = new_item->line().p1().y();
+                item_x2 = new_item->line().p2().x();
+                item_y2 = new_item->line().p2().y();
+                item_stroke_w = new_item->getPen().width();
+                item_stroke_color = new_item->getPen().color();
+                this->line_item = new_item;
             }
         }
     }
@@ -76,6 +92,12 @@ void RightSideBar::itemStrokeColorEdited()
 
         if(rect_item != nullptr)
             rect_item->strokeColorChanged(color);
+
+        if(ellipse_item != nullptr)
+            ellipse_item->strokeColorChanged(color);
+
+        if(line_item != nullptr)
+            line_item->strokeColorChanged(color);
     }
 }
 
@@ -94,6 +116,9 @@ void RightSideBar::itemFillColorEdited()
 
         if(rect_item != nullptr)
             rect_item->fillColorChanged(color);
+
+        if(ellipse_item != nullptr)
+            ellipse_item->fillColorChanged(color);
     }
 }
 
@@ -103,6 +128,10 @@ void RightSideBar::itemStrokeOpacityEdited(int v)
     item_stroke_color.setAlpha(v);
     if(rect_item != nullptr)
         rect_item->strokeColorChanged(item_stroke_color);
+    if(ellipse_item != nullptr)
+        ellipse_item->strokeColorChanged(item_stroke_color);
+    if(line_item != nullptr)
+        line_item->strokeColorChanged(item_stroke_color);
 }
 
 //=========================================================================================================
@@ -111,15 +140,22 @@ void RightSideBar::itemFillOpacityEdited(int v)
     item_fill_color.setAlpha(v);
     if(rect_item != nullptr)
         rect_item->fillColorChanged(item_fill_color);
+    if(ellipse_item != nullptr)
+        ellipse_item->fillColorChanged(item_fill_color);
 
 }
 
+//=========================================================================================================
 void RightSideBar::itemStrokeWEdited(int v)
 {
     item_stroke_w = v;
 
     if(rect_item != nullptr)
         rect_item->strokeWidthChanged(item_stroke_w);
+    if(ellipse_item != nullptr)
+        ellipse_item->strokeWidthChanged(item_stroke_w);
+    if(line_item != nullptr)
+        line_item->strokeWidthChanged(item_stroke_w);
 }
 
 //=========================================================================================================
@@ -130,6 +166,9 @@ void RightSideBar::itemXEdited(int op)
     if(new_item->hasFocus()){
         if(rect_item != nullptr)
             rect_item->xChanged(item_x);
+
+        if(ellipse_item != nullptr)
+            ellipse_item->xChanged(item_x);
     }
 
 }
@@ -142,27 +181,37 @@ void RightSideBar::itemYEdited(int op)
     if(new_item->hasFocus()){
         if(rect_item != nullptr)
             rect_item->yChanged(item_y);
+        if(ellipse_item != nullptr)
+            ellipse_item->yChanged(item_y);
     }
 }
 
 void RightSideBar::itemX1Edited(int v)
 {
-
+    item_x1 = v;
+    if(line_item != nullptr)
+        line_item->x1Changed(item_x1);
 }
 
 void RightSideBar::itemY1Edited(int v)
 {
-
+    item_y1 = v;
+    if(line_item != nullptr)
+        line_item->y1Changed(item_y1);
 }
 
 void RightSideBar::itemX2Edited(int v)
 {
-
+    item_x2 = v;
+    if(line_item != nullptr)
+        line_item->x2Changed(item_x2);
 }
 
 void RightSideBar::itemY2Edited(int v)
 {
-
+    item_y2 = v;
+    if(line_item != nullptr)
+        line_item->y2Changed(item_y2);
 }
 
 void RightSideBar::itemRXEdited(int v)
@@ -188,6 +237,8 @@ void RightSideBar::itemWEdited(int v)
     if(new_item->hasFocus()){
         if(rect_item != nullptr)
             rect_item->wChanged(item_w);
+        if(ellipse_item != nullptr)
+            ellipse_item->wChanged(item_w);
         qDebug() << "W_EDITED";
     }
 }
@@ -199,6 +250,8 @@ void RightSideBar::itemHEdited(int v)
     if(new_item->hasFocus()){
         if(rect_item != nullptr)
             rect_item->hChanged(item_h);
+        if(ellipse_item != nullptr)
+            ellipse_item->hChanged(item_h);
     }
 }
 
@@ -276,39 +329,117 @@ void RightSideBar::setupPositionPropBox(RightSideBar::ShowMode mode)
         layout->addItem(y_layout,1,1);
     }
 
-//    if(mode == Line){
-//        QHBoxLayout *x1_layout = new QHBoxLayout();
-//        QLabel *x1_label = new QLabel("x1");
-//        QLineEdit *x1_edit = new QLineEdit(QString::number(item_x1));
-//        x1_edit->setValidator(new QIntValidator(0,10000));
-//        x1_layout->addWidget(x1_label);
-//        x1_layout->addWidget(x1_edit);
-//        layout->addItem(x1_layout,0,0);
+    if(mode == Ellipse){
+        QHBoxLayout *w_layout = new QHBoxLayout();
 
-//        QHBoxLayout *y1_layout = new QHBoxLayout();
-//        QLabel *y1_label = new QLabel("y1");
-//        QLineEdit *y1_edit = new QLineEdit(QString::number(item_y1));
-//        y1_edit->setValidator(new QIntValidator(0,10000));
-//        y1_layout->addWidget(y1_label);
-//        y1_layout->addWidget(y1_edit);
-//        layout->addItem(y1_layout,1,0);
+        QLabel *w_label = new QLabel("W");
+        w_layout->addWidget(w_label);
 
-//        QHBoxLayout *x2_layout = new QHBoxLayout();
-//        QLabel *x2_label = new QLabel("x2");
-//        QLineEdit *x2_edit = new QLineEdit(QString::number(item_x2));
-//        x2_edit->setValidator(new QIntValidator(0,10000));
-//        x2_layout->addWidget(x2_label);
-//        x2_layout->addWidget(x2_edit);
-//        layout->addItem(x2_layout,0,1);
+        QSpinBox *w_edit = new QSpinBox();
+        w_edit->setRange(0, 10000);
+        w_edit->setValue(item_w);
+        connect(w_edit, SIGNAL(valueChanged(int)), this, SLOT(itemWEdited(int)));
+        connect(ellipse_item,SIGNAL(wChangedSignal(int)), w_edit, SLOT(setValue(int)));
+        w_layout->addWidget(w_edit);
 
-//        QHBoxLayout *y2_layout = new QHBoxLayout();
-//        QLabel *y2_label = new QLabel("y2");
-//        QLineEdit *y2_edit = new QLineEdit(QString::number(item_y2));
-//        y2_edit->setValidator(new QIntValidator(0,10000));
-//        y2_layout->addWidget(y2_label);
-//        y2_layout->addWidget(y2_edit);
-//        layout->addItem(y2_layout,1,1);
-//    }
+        layout->addItem(w_layout,0,0);
+
+
+        QHBoxLayout *h_layout = new QHBoxLayout();
+
+        QLabel *h_label = new QLabel("H");
+        h_layout->addWidget(h_label);
+
+        QSpinBox *h_edit = new QSpinBox();
+        h_edit->setRange(0, 10000);
+        h_edit->setValue(item_h);
+        connect(h_edit, SIGNAL(valueChanged(int)), this, SLOT(itemHEdited(int)));
+        connect(ellipse_item,SIGNAL(hChangedSignal(int)), h_edit, SLOT(setValue(int)));
+        h_layout->addWidget(h_edit);
+
+        layout->addItem(h_layout,1,0);
+
+
+        QHBoxLayout *x_layout = new QHBoxLayout();
+
+        QLabel *x_label = new QLabel("X");
+        x_layout->addWidget(x_label);
+
+        QSpinBox *x_edit = new QSpinBox();
+        x_edit->setRange(0, 10000);
+        x_edit->setValue(item_x);
+        connect(x_edit, SIGNAL(valueChanged(int)), this, SLOT(itemXEdited(int)));
+        connect(ellipse_item,SIGNAL(xChangedSignal(int)), x_edit, SLOT(setValue(int)));
+        x_layout->addWidget(x_edit);
+
+        layout->addItem(x_layout,0,1);
+
+
+        QHBoxLayout *y_layout = new QHBoxLayout();
+
+        QLabel *y_label = new QLabel("Y");
+        y_layout->addWidget(y_label);
+
+        QSpinBox *y_edit = new QSpinBox();
+        y_edit->setRange(0, 10000);
+        y_edit->setValue(item_y);
+        connect(y_edit, SIGNAL(valueChanged(int)), this, SLOT(itemYEdited(int)));
+        connect(ellipse_item,SIGNAL(yChangedSignal(int)), y_edit, SLOT(setValue(int)));
+        y_layout->addWidget(y_edit);
+
+        layout->addItem(y_layout,1,1);
+    }
+
+    if(mode == Line){
+        QHBoxLayout *first_layout = new QHBoxLayout();
+
+        QLabel *x1_label = new QLabel("X1");
+        first_layout->addWidget(x1_label);
+
+        QSpinBox *x1_edit = new QSpinBox();
+        x1_edit->setRange(0, 10000);
+        x1_edit->setValue(item_x1);
+        connect(x1_edit, SIGNAL(valueChanged(int)), this, SLOT(itemX1Edited(int)));
+        connect(line_item,SIGNAL(x1ChangedSignal(int)), x1_edit, SLOT(setValue(int)));
+        first_layout->addWidget(x1_edit);
+
+        QLabel *y1_label = new QLabel("Y1");
+        first_layout->addWidget(y1_label);
+
+        QSpinBox *y1_edit = new QSpinBox();
+        y1_edit->setRange(0, 10000);
+        y1_edit->setValue(item_x1);
+        connect(y1_edit, SIGNAL(valueChanged(int)), this, SLOT(itemY1Edited(int)));
+        connect(line_item,SIGNAL(y1ChangedSignal(int)), y1_edit, SLOT(setValue(int)));
+        first_layout->addWidget(y1_edit);
+
+        layout->addItem(first_layout,0,0);
+
+
+        QHBoxLayout *second_layout = new QHBoxLayout();
+
+        QLabel *x2_label = new QLabel("X2");
+        second_layout->addWidget(x2_label);
+
+        QSpinBox *x2_edit = new QSpinBox();
+        x2_edit->setRange(0, 10000);
+        x2_edit->setValue(item_x2);
+        connect(x2_edit, SIGNAL(valueChanged(int)), this, SLOT(itemX2Edited(int)));
+        connect(line_item,SIGNAL(x2ChangedSignal(int)), x2_edit, SLOT(setValue(int)));
+        second_layout->addWidget(x2_edit);
+
+        QLabel *y2_label = new QLabel("Y2");
+        second_layout->addWidget(y2_label);
+
+        QSpinBox *y2_edit = new QSpinBox();
+        y2_edit->setRange(0, 10000);
+        y2_edit->setValue(item_x2);
+        connect(y2_edit, SIGNAL(valueChanged(int)), this, SLOT(itemY2Edited(int)));
+        connect(line_item,SIGNAL(y2ChangedSignal(int)), y2_edit, SLOT(setValue(int)));
+        second_layout->addWidget(y2_edit);
+
+        layout->addItem(second_layout,1,0);
+    }
 
     positionProp->setLayout(layout);
 }
@@ -326,83 +457,97 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
 
     QGridLayout *layout = new QGridLayout;
 
-//    if(mode == Line){
-//        QHBoxLayout *stroke_layout = new QHBoxLayout();
-
-//        QLabel *stroke_label = new QLabel("Stroke");
-//        stroke_layout->addWidget(stroke_label);
-
-//        QPushButton *stroke_color = new QPushButton();
-//        stroke_color->setStyleSheet("background-color: " + item_stroke_color.name());
-//        connect(stroke_color, &QAbstractButton::clicked, this, itemStrokeColorEdited);
-//        stroke_layout->addWidget(stroke_color);
-
-//        QLabel *stroke_w_label = new QLabel("w");
-//        QLineEdit *stroke_w_edit = new QLineEdit(QString::number(item_stroke_w));
-//        stroke_w_edit->setValidator(new QIntValidator(0,10000));
-//        connect(stroke_w_edit, SIGNAL(textEdited(QString)), this, SLOT(itemStrokeWEdited(QString)));
-//        stroke_layout->addWidget(stroke_w_label);
-//        stroke_layout->addWidget(stroke_w_edit);
-
-//        QLabel *stroke_op_label = new QLabel("opacity");
-//        QLineEdit *stroke_op_edit = new QLineEdit(QString::number(item_stroke_color.alpha()));
-//        stroke_op_edit->setValidator(new QIntValidator(0,255));
-//        connect(this, SIGNAL(setStrokeOpacitySignal(QString)), stroke_op_edit, SLOT(setText(QString)));
-//        connect(stroke_op_edit, SIGNAL(textEdited(QString)), this, SLOT(itemStrokeOpacityEdited(QString)));
-//        stroke_layout->addWidget(stroke_op_label);
-//        stroke_layout->addWidget(stroke_op_edit);
-
-//        layout->addItem(stroke_layout,0,0);
-//    }
-
-//    if(mode == Ellipse){
-//        QHBoxLayout *stroke_layout = new QHBoxLayout();
-
-//        QLabel *stroke_label = new QLabel("Stroke");
-//        stroke_layout->addWidget(stroke_label);
-
-//        QPushButton *stroke_color = new QPushButton();
-//        stroke_color->setStyleSheet("background-color: " + item_stroke_color.name());
-//        connect(stroke_color, &QAbstractButton::clicked, this, itemStrokeColorEdited);
-//        stroke_layout->addWidget(stroke_color);
-
-//        QLabel *stroke_w_label = new QLabel("w");
-//        QLineEdit *stroke_w_edit = new QLineEdit(QString::number(item_stroke_w));
-//        stroke_w_edit->setValidator(new QIntValidator(0,10000));
-//        stroke_layout->addWidget(stroke_w_label);
-//        stroke_layout->addWidget(stroke_w_edit);
-
-//        QLabel *stroke_op_label = new QLabel("opacity");
-//        QLineEdit *stroke_op_edit = new QLineEdit(QString::number(item_stroke_color.alpha()));
-//        stroke_op_edit->setValidator(new QIntValidator(0,255));
-//        connect(this, SIGNAL(setStrokeOpacitySignal(QString)), stroke_op_edit, SLOT(setText(QString)));
-//        connect(stroke_op_edit, SIGNAL(textEdited(QString)), this, SLOT(itemStrokeOpacityEdited(QString)));
-//        stroke_layout->addWidget(stroke_op_label);
-//        stroke_layout->addWidget(stroke_op_edit);
-
-//        layout->addItem(stroke_layout,0,0);
+    if(mode == Line){
+        QHBoxLayout *stroke_layout = new QHBoxLayout();
 
 
-//        QHBoxLayout *fill_layout = new QHBoxLayout();
 
-//        QLabel *fill_label = new QLabel("Fill");
-//        fill_layout->addWidget(fill_label);
+        QLabel *stroke_label = new QLabel("Stroke");
+        stroke_layout->addWidget(stroke_label);
 
-//        QPushButton *fill_color = new QPushButton();
-//        fill_color->setStyleSheet("background-color: " + item_fill_color.name());
-//        connect(fill_color, &QAbstractButton::clicked, this, itemFillColorEdited);
-//        fill_layout->addWidget(fill_color);
+        QPushButton *stroke_color = new QPushButton();
+        stroke_color->setStyleSheet("background-color: " + item_stroke_color.name());
+        connect(stroke_color, &QAbstractButton::clicked, this, itemStrokeColorEdited);
+        stroke_layout->addWidget(stroke_color);
 
-//        QLabel *fill_op_label = new QLabel("opacity");
-//        QLineEdit *fill_op_edit = new QLineEdit(QString::number(item_fill_color.alpha()));
-//        fill_op_edit->setValidator(new QIntValidator(0,255));
-//        connect(this, SIGNAL(setFillOpacitySignal(QString)), fill_op_edit, SLOT(setText(QString)));
-//        connect(fill_op_edit, SIGNAL(textEdited(QString)), this, SLOT(itemFillOpacityEdited(QString)));
-//        fill_layout->addWidget(fill_op_label);
-//        fill_layout->addWidget(fill_op_edit);
+        QLabel *stroke_w_label = new QLabel("w");
+        stroke_layout->addWidget(stroke_w_label);
 
-//        layout->addItem(fill_layout,1,0);
-//    }
+        QSpinBox *stroke_w_edit = new QSpinBox();
+        stroke_w_edit->setRange(0, 10000);
+        stroke_w_edit->setValue(item_stroke_w);
+        connect(stroke_w_edit, SIGNAL(valueChanged(int)), this, SLOT(itemStrokeWEdited(int)));
+        stroke_layout->addWidget(stroke_w_edit);
+
+        QLabel *stroke_op_label = new QLabel("opacity");
+        stroke_layout->addWidget(stroke_op_label);
+
+        QSpinBox *stroke_op_edit = new QSpinBox();
+        stroke_op_edit->setRange(0, 255);
+        stroke_op_edit->setValue(item_stroke_color.alpha());
+        connect(this, SIGNAL(setStrokeOpacitySignal(int)), stroke_op_edit, SLOT(setValue(int)));
+        connect(stroke_op_edit, SIGNAL(valueChanged(int)), this, SLOT(itemStrokeOpacityEdited(int)));
+        stroke_layout->addWidget(stroke_op_edit);
+
+        layout->addItem(stroke_layout,0,0);
+    }
+
+    if(mode == Ellipse){
+        QHBoxLayout *stroke_layout = new QHBoxLayout();
+
+
+        QLabel *stroke_label = new QLabel("Stroke");
+        stroke_layout->addWidget(stroke_label);
+
+        QPushButton *stroke_color = new QPushButton();
+        stroke_color->setStyleSheet("background-color: " + item_stroke_color.name());
+        connect(stroke_color, &QAbstractButton::clicked, this, itemStrokeColorEdited);
+        stroke_layout->addWidget(stroke_color);
+
+        QLabel *stroke_w_label = new QLabel("w");
+        stroke_layout->addWidget(stroke_w_label);
+
+        QSpinBox *stroke_w_edit = new QSpinBox();
+        stroke_w_edit->setRange(0, 10000);
+        stroke_w_edit->setValue(item_stroke_w);
+        connect(stroke_w_edit, SIGNAL(valueChanged(int)), this, SLOT(itemStrokeWEdited(int)));
+        stroke_layout->addWidget(stroke_w_edit);
+
+        QLabel *stroke_op_label = new QLabel("opacity");
+        stroke_layout->addWidget(stroke_op_label);
+
+        QSpinBox *stroke_op_edit = new QSpinBox();
+        stroke_op_edit->setRange(0, 255);
+        stroke_op_edit->setValue(item_stroke_color.alpha());
+        connect(this, SIGNAL(setStrokeOpacitySignal(int)), stroke_op_edit, SLOT(setValue(int)));
+        connect(stroke_op_edit, SIGNAL(valueChanged(int)), this, SLOT(itemStrokeOpacityEdited(int)));
+        stroke_layout->addWidget(stroke_op_edit);
+
+        layout->addItem(stroke_layout,0,0);
+
+
+        QHBoxLayout *fill_layout = new QHBoxLayout();
+
+        QLabel *fill_label = new QLabel("Fill");
+        fill_layout->addWidget(fill_label);
+
+        QPushButton *fill_color = new QPushButton();
+        fill_color->setStyleSheet("background-color: " + item_fill_color.name());
+        connect(fill_color, &QAbstractButton::clicked, this, itemFillColorEdited);
+        fill_layout->addWidget(fill_color);
+
+        QLabel *fill_op_label = new QLabel("opacity");
+        fill_layout->addWidget(fill_op_label);
+
+        QSpinBox *fill_op_edit = new QSpinBox();
+        fill_op_edit->setRange(0, 255);
+        fill_op_edit->setValue(item_fill_color.alpha());
+        connect(this, SIGNAL(setFillOpacitySignal(int)), fill_op_edit, SLOT(setValue(int)));
+        connect(fill_op_edit, SIGNAL(valueChanged(int)), this, SLOT(itemFillOpacityEdited(int)));
+        fill_layout->addWidget(fill_op_edit);
+
+        layout->addItem(fill_layout,1,0);
+    }
 
     if(mode == Rect){
         QHBoxLayout *stroke_layout = new QHBoxLayout();
@@ -428,6 +573,7 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
 
         QLabel *stroke_op_label = new QLabel("opacity");
         stroke_layout->addWidget(stroke_op_label);
+
 
         QSpinBox *stroke_op_edit = new QSpinBox();
         stroke_op_edit->setRange(0, 255);

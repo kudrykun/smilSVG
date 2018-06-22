@@ -41,9 +41,27 @@ public:
     void setStrokeLineJoin(Qt::PenJoinStyle joinStyle);
     void setStrokeDashoffset(qreal offset);
     void setStrokeDasharray(const QVector<qreal> & pattern);
+
+signals:
+    void xChangedSignal(int v);
+    void yChangedSignal(int v);
+    void wChangedSignal(int v);
+    void hChangedSignal(int v);
+    void strokeColorChangeSignal(QColor c);
+    void fillColorChangedSignal(QColor c);
+    void strokeWidthChangedSignal(int w);
+
 public slots:
     void setScaleFactor(qreal factor);
     void cornerMove(GrabbingCorner *owner, qreal dx, qreal dy);
+
+    void xChanged(int v);
+    void yChanged(int v);
+    void wChanged(int v);
+    void hChanged(int v);
+    void strokeColorChanged(QColor c);
+    void fillColorChanged(QColor c);
+    void strokeWidthChanged(int w);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;

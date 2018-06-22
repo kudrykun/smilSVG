@@ -19,7 +19,7 @@ public:
     };
 
 public:
-    LineItem(const QLineF &line);
+    LineItem(const QLineF &line, QGraphicsItem* parent = nullptr);
     LineItem* copy();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -34,9 +34,24 @@ public:
     void setStrokeDashoffset(qreal offset);
     void setStrokeDasharray(const QVector<qreal> & pattern);
 
+signals:
+    void x1ChangedSignal(int v);
+    void y1ChangedSignal(int v);
+    void x2ChangedSignal(int v);
+    void y2ChangedSignal(int v);
+    void strokeColorChangeSignal(QColor c);
+    void strokeWidthChangedSignal(int w);
+
 public slots:
     void setScaleFactor(qreal factor);
     void cornerMove(GrabbingCorner *owner, qreal dx, qreal dy);
+
+    void x1Changed(int v);
+    void y1Changed(int v);
+    void x2Changed(int v);
+    void y2Changed(int v);
+    void strokeColorChanged(QColor c);
+    void strokeWidthChanged(int w);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;

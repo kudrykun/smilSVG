@@ -251,6 +251,67 @@ void EllipseItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     update();
     updateCornersPosition();
     qDebug() << this->rect() << " " << this->pos();
+
+    emit wChangedSignal(tempRect.width());
+    emit hChangedSignal(tempRect.height());
+    emit xChangedSignal(pos().x());
+    emit yChangedSignal(pos().y());
+}
+
+//=========================================================================================================
+void EllipseItem::xChanged(int v)
+{
+    this->setPos(v, pos().y());
+}
+
+//=========================================================================================================
+void EllipseItem::yChanged(int v)
+{
+    this->setPos(pos().x(), v);
+}
+
+//=========================================================================================================
+void EllipseItem::wChanged(int v)
+{
+    auto rect = this->rect();
+    qDebug() << "W_CHANGED";
+    rect.setWidth(v);
+    this->setRect(rect);
+    update();
+    updateCornersPosition();
+}
+
+//=========================================================================================================
+void EllipseItem::hChanged(int v)
+{
+    auto rect = this->rect();
+    qDebug() << rect;
+    rect.setHeight(v);
+    this->setRect(rect);
+    update();
+    updateCornersPosition();
+}
+
+//=========================================================================================================
+void EllipseItem::strokeColorChanged(QColor c)
+{
+    currentPen.setColor(c);
+    update();
+}
+
+//=========================================================================================================
+void EllipseItem::fillColorChanged(QColor c)
+{
+    currentBrush.setColor(c);
+    update();
+}
+
+//=========================================================================================================
+void EllipseItem::strokeWidthChanged(int w)
+{
+    currentPen.setWidth(w);
+    update();
+    updateCornersPosition();
 }
 
 //=========================================================================================================
@@ -282,6 +343,8 @@ void EllipseItem::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
     if(isSelected()){
         auto d = ev->pos() - previous_pos;
         this->moveBy(d.x(), d.y());
+        emit xChangedSignal(pos().x());
+        emit yChangedSignal(pos().y());
     }
     QGraphicsItem::mouseMoveEvent(ev);
 }
