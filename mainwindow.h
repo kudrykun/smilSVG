@@ -41,6 +41,8 @@ private:
     void createItemsActionGroup();
     void createEditionActionGroup();
     void createItemsToolbar();
+    void createMenus();
+
 private:
     Ui::MainWindow *ui;
 
@@ -53,6 +55,7 @@ private:
     QActionGroup *editionActionGroup;
 
     RightSideBar *rightBar = nullptr;
+    QMenu *fileMenu = nullptr;
 };
 
 #endif // MAINWINDOW_H

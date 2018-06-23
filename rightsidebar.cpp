@@ -84,12 +84,15 @@ RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(pare
 
     setupAnimationPropBox(showMode);
     animationsPropTemp = this->addWidget(animationsProp);
+    qDebug() << "RIGHT BAR CREATED";
 }
 
+//=========================================================================================================
 void RightSideBar::deleteAnimationSlot()
 {
     qDebug() << "DELETE SLOT";
     auto btn = dynamic_cast<QPushButton*>(QObject::sender());
+
     if(rect_item != nullptr)
     {
         rect_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer").value<void *>());
@@ -99,16 +102,41 @@ void RightSideBar::deleteAnimationSlot()
             toolBox->removeItem(toolBox->indexOf(widget));
         }
     }
+
+    if(ellipse_item != nullptr)
+    {
+        ellipse_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer").value<void *>());
+        if(toolBox != nullptr)
+        {
+            auto widget = (QWidget *) btn->property("anim_widget_pointer").value<void *>();
+            toolBox->removeItem(toolBox->indexOf(widget));
+        }
+    }
+
+    if(line_item != nullptr)
+    {
+        line_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer").value<void *>());
+        if(toolBox != nullptr)
+        {
+            auto widget = (QWidget *) btn->property("anim_widget_pointer").value<void *>();
+            toolBox->removeItem(toolBox->indexOf(widget));
+        }
+    }
 }
 
+//=========================================================================================================
 void RightSideBar::startAnimationSlot()
 {
-    qDebug() << "PLAY SLOT";
     auto btn = dynamic_cast<QPushButton*>(QObject::sender());
+
     if(rect_item != nullptr)
-    {
         rect_item->startAnimation((AnimateTag *) btn->property("play_animation_pointer").value<void *>());
-    }
+
+    if(ellipse_item != nullptr)
+        ellipse_item->startAnimation((AnimateTag *) btn->property("play_animation_pointer").value<void *>());
+
+    if(line_item != nullptr)
+        line_item->startAnimation((AnimateTag *) btn->property("play_animation_pointer").value<void *>());
 }
 
 //=========================================================================================================
@@ -135,6 +163,7 @@ void RightSideBar::itemStrokeColorEdited()
     }
 }
 
+//=========================================================================================================
 void RightSideBar::animateFromColorEdited()
 {
     const QColor color = QColorDialog::getColor(item_stroke_color, this, "Select stroke color");
@@ -146,6 +175,7 @@ void RightSideBar::animateFromColorEdited()
     }
 }
 
+//=========================================================================================================
 void RightSideBar::animateToColorEdited()
 {
     const QColor color = QColorDialog::getColor(item_stroke_color, this, "Select stroke color");
@@ -254,6 +284,7 @@ void RightSideBar::itemYEdited(int op)
     }
 }
 
+//=========================================================================================================
 void RightSideBar::itemX1Edited(int v)
 {
     item_x1 = v;
@@ -261,6 +292,7 @@ void RightSideBar::itemX1Edited(int v)
         line_item->x1Changed(item_x1);
 }
 
+//=========================================================================================================
 void RightSideBar::itemY1Edited(int v)
 {
     item_y1 = v;
@@ -268,6 +300,7 @@ void RightSideBar::itemY1Edited(int v)
         line_item->y1Changed(item_y1);
 }
 
+//=========================================================================================================
 void RightSideBar::itemX2Edited(int v)
 {
     item_x2 = v;
@@ -275,6 +308,8 @@ void RightSideBar::itemX2Edited(int v)
         line_item->x2Changed(item_x2);
 }
 
+
+//=========================================================================================================
 void RightSideBar::itemY2Edited(int v)
 {
     item_y2 = v;
@@ -282,6 +317,7 @@ void RightSideBar::itemY2Edited(int v)
         line_item->y2Changed(item_y2);
 }
 
+//=========================================================================================================
 void RightSideBar::itemRXEdited(int v)
 {
     item_rx = v;
@@ -290,6 +326,7 @@ void RightSideBar::itemRXEdited(int v)
         rect_item->cornerRadChanged(item_rx,item_ry);
 }
 
+//=========================================================================================================
 void RightSideBar::itemRYEdited(int v)
 {
     item_ry = v;
@@ -298,6 +335,7 @@ void RightSideBar::itemRYEdited(int v)
         rect_item->cornerRadChanged(item_rx,item_ry);
 }
 
+//=========================================================================================================
 void RightSideBar::itemWEdited(int v)
 {
     item_w = v;
@@ -311,6 +349,7 @@ void RightSideBar::itemWEdited(int v)
     }
 }
 
+//=========================================================================================================
 void RightSideBar::itemHEdited(int v)
 {
     item_h = v;
@@ -333,8 +372,25 @@ void RightSideBar::addAnimationToItemSlot()
         toolBox->addItem(widget, animation->getName());
         toolBox->setCurrentWidget(widget);
     }
+
+    if(ellipse_item != nullptr){
+        ellipse_item->addAnimation(global_attr_name);
+        auto animation = ellipse_item->getAnimations().last();
+        auto widget = createAnimWidget(animation);
+        toolBox->addItem(widget, animation->getName());
+        toolBox->setCurrentWidget(widget);
+    }
+
+    if(line_item != nullptr){
+        line_item->addAnimation(global_attr_name);
+        auto animation = line_item->getAnimations().last();
+        auto widget = createAnimWidget(animation);
+        toolBox->addItem(widget, animation->getName());
+        toolBox->setCurrentWidget(widget);
+    }
 }
 
+//=========================================================================================================
 void RightSideBar::changedAttributeName(QString name)
 {
     global_attr_name = name;
@@ -748,7 +804,10 @@ void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
         QComboBox *box = new QComboBox;
         if(rect_item != nullptr)
             box->addItems(rect_item->getAnimAttrNames());
-        //box->setCurrentText(QString::fromUtf8(a->propertyName()));
+        if(ellipse_item != nullptr)
+            box->addItems(ellipse_item->getAnimAttrNames());
+        if(line_item != nullptr)
+            box->addItems(line_item->getAnimAttrNames());
         global_attr_name = box->currentText();
         connect(box, SIGNAL(currentTextChanged(QString)), this, SLOT(changedAttributeName(QString)));
         l->addWidget(box);
@@ -761,6 +820,10 @@ void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
         QPushButton *play_all_anim_btn = new QPushButton("Play animations");
         if(rect_item != nullptr)
             connect(play_all_anim_btn, &QAbstractButton::released, rect_item, RectItem::playAnimations);
+        if(ellipse_item != nullptr)
+            connect(play_all_anim_btn, &QAbstractButton::released, ellipse_item, EllipseItem::playAnimations);
+        if(line_item != nullptr)
+            connect(play_all_anim_btn, &QAbstractButton::released, line_item, LineItem::playAnimations);
         layout->addWidget(play_all_anim_btn);
     }
 
@@ -768,7 +831,11 @@ void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
     {
         QPushButton *stop_all_anim_btn = new QPushButton("Stop animations");
         if(rect_item != nullptr)
-        connect(stop_all_anim_btn, &QAbstractButton::released, rect_item, RectItem::stopAnimations);
+            connect(stop_all_anim_btn, &QAbstractButton::released, rect_item, RectItem::stopAnimations);
+        if(ellipse_item != nullptr)
+            connect(stop_all_anim_btn, &QAbstractButton::released, ellipse_item, EllipseItem::stopAnimations);
+        if(line_item != nullptr)
+            connect(stop_all_anim_btn, &QAbstractButton::released, line_item, LineItem::stopAnimations);
         layout->addWidget(stop_all_anim_btn);
     }
 
@@ -778,11 +845,18 @@ void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
     layout->addWidget(toolBox);
 
     //ну и добавляем имеющиеся анимации
-    if(mode == Rect)
-    {
-        for(auto animation : rect_item->getAnimations())
-            toolBox->addItem(createAnimWidget(animation), animation->getName());
+    QList<AnimateTag*> animations;
+    switch(showMode){
+        case Rect:
+            animations =  rect_item->getAnimations();break;
+        case Ellipse:
+            animations =  ellipse_item->getAnimations();break;
+        case Line:
+            animations =  line_item->getAnimations();break;
     }
+
+    for(auto animation : animations)
+        toolBox->addItem(createAnimWidget(animation), animation->getName());
 }
 
 //=========================================================================================================
@@ -813,14 +887,13 @@ QWidget *RightSideBar::createAnimWidget(AnimateTag *a)
         QPushButton *delete_anim = new QPushButton("Delete");
         delete_anim->setProperty("animation_pointer", qVariantFromValue((void *) a));
         delete_anim->setProperty("anim_widget_pointer", qVariantFromValue((void *) anim_widget));
-        /*QVariant v = qVariantFromValue((void *) yourPointerHere);
 
-yourPointer = (YourClass *) v.value<void *>();*/
         connect(delete_anim, &QAbstractButton::released, this, &RightSideBar::deleteAnimationSlot);
         l->addWidget(delete_anim);
 
         anim_layout->addLayout(l);
     }
+
     //просто лейбл с типом анимации
     {
         QHBoxLayout *layout = new QHBoxLayout;

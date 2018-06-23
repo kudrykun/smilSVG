@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->createEditionActionGroup();
     this->createItemsToolbar();
     this->createRightSideBar();
+    //this->createMenus();
 }
 
 //=========================================================================================================

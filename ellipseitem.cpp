@@ -4,22 +4,52 @@
 #include <QDebug>
 #include <QPainter>
 #include <QCursor>
+#include <QGraphicsScene>
 
 //=========================================================================================================
-EllipseItem::EllipseItem(const QRectF &rect) : QGraphicsEllipseItem(rect)
+EllipseItem::EllipseItem(const QRectF &rect, bool animationItem) : QGraphicsEllipseItem(rect)
 {
     setRect(rect);
-    setPen(currentPen);
+    setPen(currentPen); 
     setBrush(currentBrush);
-    setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
+    if(!animationItem)
+        setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
+    else
+        setFlags(ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
+
+    connect(this, SIGNAL(animationXChangedSignal(int)),this, SLOT(xChanged(int)));
+    connect(this, SIGNAL(animationYChangedSignal(int)),this, SLOT(yChanged(int)));
+    connect(this, SIGNAL(animationWChangedSignal(int)),this, SLOT(wChanged(int)));
+    connect(this, SIGNAL(animationHChangedSignal(int)),this, SLOT(hChanged(int)));
+    connect(this, SIGNAL(animationRXChangedSignal(int)),this, SLOT(rxChanged(int)));
+    connect(this, SIGNAL(animationRYChangedSignal(int)),this, SLOT(ryChanged(int)));
+    connect(this, SIGNAL(animationStrokeColorChangedSignal(QColor)),this, SLOT(strokeColorChanged(QColor)));
+    connect(this, SIGNAL(animationFillColorChangedSignal(QColor)),this, SLOT(fillColorChanged(QColor)));
+    connect(this, SIGNAL(animationStrokeWidthChangedSignal(int)),this, SLOT(strokeWidthChanged(int)));
+
+
+    //инициализация списка доступныз для анимации свойств
+    {
+        animAttributesNames.push_back("x");
+        animAttributesNames.push_back("y");
+        animAttributesNames.push_back("w");
+        animAttributesNames.push_back("h");
+        animAttributesNames.push_back("strokeColor");
+        animAttributesNames.push_back("strokeOpacity");
+        animAttributesNames.push_back("fillColor");
+        animAttributesNames.push_back("fillOpacity");
+        animAttributesNames.push_back("strokeWidth");
+    }
+
+    qDebug() << "RECT ITEM CREATED";
 }
 
 //=========================================================================================================
-EllipseItem *EllipseItem::copy()
+EllipseItem *EllipseItem::copy(bool animationItem)
 {
-    EllipseItem *newItem = new EllipseItem(this->rect());
+    EllipseItem *newItem = new EllipseItem(this->rect(), animationItem);
     newItem->setPen(this->getPen());
     newItem->setPos(this->pos());
     newItem->setBrush(this->getBrush());
@@ -94,55 +124,99 @@ QBrush EllipseItem::getBrush()
 }
 
 //=========================================================================================================
-void EllipseItem::setStrokeWidth(float w)
+void EllipseItem::addAnimation(QString name)
 {
-    currentPen.setWidthF(w);
+    AnimateTag *animation = new AnimateTag(this, name.toUtf8());
+    animation->setDuration(1000);
+    animation->setLoopCount(1);
+    if(name == "strokeColor" || name == "fillColor")
+    {
+        animation->setStartValue(QColor(255,255,255));
+        animation->setEndValue(QColor(255,255,255));
+    }
+    else
+    {
+        animation->setStartValue(100);
+        animation->setEndValue(1000);
+    }
+
+    animations.push_back(animation);
 }
 
 //=========================================================================================================
-void EllipseItem::setStrokeOpacity(float op)
+void EllipseItem::deleteAnimation(AnimateTag *a)
 {
-    if(op < 0)
-        op = 0;
-    if(op > 1)
-        op = 1;
-    auto new_color = currentPen.color();
-    new_color.setAlphaF(op);
-    currentPen.setColor(new_color);
+    animations.removeOne(a);
 }
 
 //=========================================================================================================
-void EllipseItem::setStrokeColor(QColor stroke_color)
+void EllipseItem::playAnimations()
 {
-    auto new_color = stroke_color;
-    new_color.setAlpha(currentPen.color().alpha());
-    currentPen.setColor(new_color);
+    //короче, я создаю копию, на котой вопсроизводтся анимации, но копию удалаяютолько после завершения самой долгой анимации
+    int max = 0;
+    int max_index = 0;
+    for(int i = 0; i < animations.size(); i++)
+    {
+        auto a = animations.at(i);
+        if(max <= a->duration()*a->loopCount()){
+            max = a->duration()*a->loopCount();
+            max_index = i;
+        }
+    }
+
+    auto new_rect = this->copy(true);
+
+    //делаем полупрозрачной анимацию
+    auto pen = new_rect->getPen();
+    auto pen_color = pen.color();
+    pen_color.setAlpha(pen_color.alpha()/2);
+    pen.setColor(pen_color);
+    new_rect->setPen(pen);
+
+    auto brush = new_rect->getBrush();
+    auto brush_color = brush.color();
+    brush_color.setAlpha(brush_color.alpha()/2);
+    brush.setColor(brush_color);
+    new_rect->setBrush(brush);
+
+    this->scene()->addItem(new_rect);
+
+    for(int i = 0; i < animations.size(); i++)
+    {
+        if(i == max_index)
+            animations.at(i)->startAnimationOnCopy(new_rect, true);
+        else
+            animations.at(i)->startAnimationOnCopy(new_rect, false);
+    }
 }
 
 //=========================================================================================================
-void EllipseItem::setStrokeLineCap(Qt::PenCapStyle capStyle)
+void EllipseItem::stopAnimations()
 {
-    currentPen.setCapStyle(capStyle);
+    for(auto &a : animations)
+        a->stopSlot();
 }
 
 //=========================================================================================================
-void EllipseItem::setStrokeLineJoin(Qt::PenJoinStyle joinStyle)
+void EllipseItem::startAnimation(AnimateTag *a)
 {
-    currentPen.setJoinStyle(joinStyle);
-}
+    auto new_rect = this->copy(true);
 
-//=========================================================================================================
-void EllipseItem::setStrokeDashoffset(qreal offset)
-{
-    if(offset >= 0)
-        currentPen.setDashOffset(offset);
-}
+    //делаем полупрозрачной анимацию
+    auto pen = new_rect->getPen();
+    auto pen_color = pen.color();
+    pen_color.setAlpha(pen_color.alpha()/2);
+    pen.setColor(pen_color);
+    new_rect->setPen(pen);
 
-//=========================================================================================================
-void EllipseItem::setStrokeDasharray(const QVector<qreal> &pattern)
-{
-    if(!pattern.empty())
-        currentPen.setDashPattern(pattern);
+    auto brush = new_rect->getBrush();
+    auto brush_color = brush.color();
+    brush_color.setAlpha(brush_color.alpha()/2);
+    brush.setColor(brush_color);
+    new_rect->setBrush(brush);
+
+    this->scene()->addItem(new_rect);
+    a->startAnimationOnCopy(new_rect, true);
 }
 
 //=========================================================================================================
@@ -249,7 +323,8 @@ void EllipseItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     setRect(QRectF(0,0,tempRect.width(), tempRect.height()));
     setPos(QPointF(tempRect.x(), tempRect.y()) + pos());
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
     qDebug() << this->rect() << " " << this->pos();
 
     emit wChangedSignal(tempRect.width());
@@ -278,7 +353,8 @@ void EllipseItem::wChanged(int v)
     rect.setWidth(v);
     this->setRect(rect);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 //=========================================================================================================
@@ -289,7 +365,8 @@ void EllipseItem::hChanged(int v)
     rect.setHeight(v);
     this->setRect(rect);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 //=========================================================================================================
@@ -311,7 +388,8 @@ void EllipseItem::strokeWidthChanged(int w)
 {
     currentPen.setWidth(w);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 //=========================================================================================================

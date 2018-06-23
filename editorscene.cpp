@@ -27,7 +27,7 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
     RectItem *rect = new RectItem(QRectF(0,0,400,400));
     rect->setPos(300,300);
     EllipseItem *ellipse = new EllipseItem(QRectF(0,0,500,500));
-    LineItem *line = new LineItem(QLineF(0,0,1100,700), document);
+    LineItem *line = new LineItem(QLineF(0,0,1100,700));
     line->setPos(QPointF(0,0));
 
     this->addItem(document);
@@ -182,51 +182,5 @@ void EditorScene::drawBackground(QPainter *painter, const QRectF &rect)
 //=========================================================================================================
 void EditorScene::drawTestFigures()
 {
-    for(int i = 0; i < 10; i++)
-    {
-        float y = 100;
-        //прозрачность обводки
-        {
-            EllipseItem *ellipse = new EllipseItem(QRectF(10*i+i*80, y, 80, 80));
-            ellipse->setStrokeWidth(10);
-            ellipse->setStrokeOpacity(i/10.0);
-            this->addItem(ellipse);
-            y += 100;
-        }
 
-        //dasharray
-        {
-            EllipseItem *ellipse = new EllipseItem(QRectF(10*i+i*80, y, 80, 80));
-            ellipse->setStrokeWidth(10);
-            QVector<qreal> vec;
-            vec.push_back(0.5/(i+1));
-            vec.push_back(0.5*i);
-            ellipse->setStrokeDasharray(vec);
-            this->addItem(ellipse);
-            y += 100;
-        }
-
-
-        //прозрачность обводки
-        {
-            EllipseItem *ellipse = new EllipseItem(QRectF(10*i+i*80, y, 80, 80));
-            ellipse->setStrokeWidth(10);
-            ellipse->setStrokeOpacity(i/10.0);
-            this->addItem(ellipse);
-            y += 100;
-        }
-    }
-
-
-
-//    qsrand(100);
-//    for(int i = 0; i < 10; i++)
-//    {
-
-//        EllipseItem *ellipse = new EllipseItem(QRectF(qrand() % 1000 + 200,qrand() % 1000 + 200,qrand() % 500 + 100,qrand() % 500 + 100));
-//        //ellipse->setPen(QPen(QColor()));
-//        ellipse->setBrush(QBrush(QColor(qrand() % 255,qrand() % 255,qrand() % 255)));
-//        ellipse->setPen(QPen(QColor(qrand() % 255,qrand() % 255,qrand() % 255), qrand()%100));
-//        this->addItem(ellipse);
-    //    }
 }

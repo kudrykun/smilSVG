@@ -13,17 +13,6 @@ public:
     AnimateTag(QObject * target, const QByteArray & propertyName, QObject * parent = 0);
     QString getName() {return name;}
     void setName(QString n) {name = n;}
-    /*
-     * AnimateTag *animation = new AnimateTag(this, "x");
-        animation->setDuration(1000);
-        animation->setLoopCount(10);
-        animation->setStartValue(0);
-        animation->setEndValue(1000);
-
-        //animation->start();
-
-        animations.push_back(animation);
-*/
 
 public slots:
     void changedAttributeName(QString v);

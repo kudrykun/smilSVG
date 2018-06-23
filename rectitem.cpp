@@ -7,14 +7,18 @@
 #include "editorscene.h"
 
 //=========================================================================================================
-RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
+RectItem::RectItem(const QRectF &rect, bool animationItem) : QGraphicsRectItem(rect)
 {
     setRect(rect);
     setPen(currentPen);
     setBrush(currentBrush);
-    setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
+    if(!animationItem)
+        setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
+    else
+        setFlags(ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
+
     connect(this, SIGNAL(animationXChangedSignal(int)),this, SLOT(xChanged(int)));
     connect(this, SIGNAL(animationYChangedSignal(int)),this, SLOT(yChanged(int)));
     connect(this, SIGNAL(animationWChangedSignal(int)),this, SLOT(wChanged(int)));
@@ -54,12 +58,14 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
         animAttributesNames.push_back("rx");
         animAttributesNames.push_back("ry");
     }
+
+    qDebug() << "RECT ITEM CREATED";
 }
 
 //=========================================================================================================
-RectItem *RectItem::copy()
+RectItem *RectItem::copy(bool animationItem)
 {
-    RectItem *newItem = new RectItem(this->rect());
+    RectItem *newItem = new RectItem(this->rect(),animationItem);
     qDebug() << this->rect();
     newItem->setPen(this->getPen());
     newItem->setBrush(this->getBrush());
@@ -166,7 +172,7 @@ void RectItem::playAnimations()
         }
     }
 
-    auto new_rect = this->copy();
+    auto new_rect = this->copy(true);
 
     //делаем полупрозрачной анимацию
     auto pen = new_rect->getPen();
@@ -202,7 +208,7 @@ void RectItem::stopAnimations()
 //=========================================================================================================
 void RectItem::startAnimation(AnimateTag *a)
 {
-    auto new_rect = this->copy();
+    auto new_rect = this->copy(true);
 
     //делаем полупрозрачной анимацию
     auto pen = new_rect->getPen();

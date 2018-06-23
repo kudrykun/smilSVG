@@ -4,21 +4,44 @@
 #include <QDebug>
 #include <QPainter>
 #include <QCursor>
+#include <QGraphicsScene>
 
 //=========================================================================================================
-LineItem::LineItem(const QLineF &line, QGraphicsItem* parent) : QGraphicsLineItem(line, parent)
+LineItem::LineItem(const QLineF &line, bool animationItem, QGraphicsItem* parent) : QGraphicsLineItem(line, parent)
 {
     setLine(line);
     setPen(currentPen);
-    setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
+    if(!animationItem)
+        setFlags(ItemIsSelectable|ItemSendsGeometryChanges);
+    else
+        setFlags(ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
     current_corner = 0;
+
+    connect(this, SIGNAL(animationX1ChangedSignal(int)),this, SLOT(x1Changed(int)));
+    connect(this, SIGNAL(animationY1ChangedSignal(int)),this, SLOT(y1Changed(int)));
+    connect(this, SIGNAL(animationX2ChangedSignal(int)),this, SLOT(x2Changed(int)));
+    connect(this, SIGNAL(animationY2ChangedSignal(int)),this, SLOT(y2Changed(int)));
+    connect(this, SIGNAL(animationStrokeColorChangedSignal(QColor)),this, SLOT(strokeColorChanged(QColor)));
+    connect(this, SIGNAL(animationStrokeWidthChangedSignal(int)),this, SLOT(strokeWidthChanged(int)));
+
+    //инициализация списка доступныз для анимации свойств
+    {
+        animAttributesNames.push_back("x1");
+        animAttributesNames.push_back("y1");
+        animAttributesNames.push_back("x2");
+        animAttributesNames.push_back("y2");
+        animAttributesNames.push_back("strokeColor");
+        animAttributesNames.push_back("strokeWidth");
+    }
+
+    qDebug() << "LINE ITEM CREATED";
 }
 
 //=========================================================================================================
-LineItem *LineItem::copy()
+LineItem *LineItem::copy(bool animationItem)
 {
-    LineItem *newItem = new LineItem(this->line());
+    LineItem *newItem = new LineItem(this->line(), animationItem);
     newItem->setPen(this->getPen());
     newItem->setPos(this->pos());
 
@@ -66,11 +89,6 @@ void LineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget)
 }
 
-//=========================================================================================================
-void LineItem::setPen(const QPen &pen)
-{
-    currentPen = pen;
-}
 
 //=========================================================================================================
 QPen LineItem::getPen()
@@ -79,56 +97,87 @@ QPen LineItem::getPen()
 }
 
 //=========================================================================================================
-void LineItem::setStrokeWidth(float w)
+void LineItem::addAnimation(QString name)
 {
-    currentPen.setWidthF(w);
+    AnimateTag *animation = new AnimateTag(this, name.toUtf8());
+    animation->setDuration(1000);
+    animation->setLoopCount(1);
+    if(name == "strokeColor" || name == "fillColor")
+    {
+        animation->setStartValue(QColor(255,255,255));
+        animation->setEndValue(QColor(255,255,255));
+    }
+    else
+    {
+        animation->setStartValue(100);
+        animation->setEndValue(1000);
+    }
+
+    animations.push_back(animation);
 }
 
 //=========================================================================================================
-void LineItem::setStrokeOpacity(float op)
+void LineItem::deleteAnimation(AnimateTag *a)
 {
-    if(op < 0)
-        op = 0;
-    if(op > 1)
-        op = 1;
-    auto new_color = currentPen.color();
-    new_color.setAlphaF(op);
-    currentPen.setColor(new_color);
+    animations.removeOne(a);
 }
 
 //=========================================================================================================
-void LineItem::setStrokeColor(QColor stroke_color)
+void LineItem::playAnimations()
 {
-    auto new_color = stroke_color;
-    new_color.setAlpha(currentPen.color().alpha());
-    currentPen.setColor(new_color);
+    //короче, я создаю копию, на котой вопсроизводтся анимации, но копию удалаяютолько после завершения самой долгой анимации
+    int max = 0;
+    int max_index = 0;
+    for(int i = 0; i < animations.size(); i++)
+    {
+        auto a = animations.at(i);
+        if(max <= a->duration()*a->loopCount()){
+            max = a->duration()*a->loopCount();
+            max_index = i;
+        }
+    }
+
+    auto new_rect = this->copy(true);
+
+    //делаем полупрозрачной анимацию
+    auto pen = new_rect->getPen();
+    auto pen_color = pen.color();
+    pen_color.setAlpha(pen_color.alpha()/2);
+    pen.setColor(pen_color);
+    new_rect->setPen(pen);
+
+    this->scene()->addItem(new_rect);
+
+    for(int i = 0; i < animations.size(); i++)
+    {
+        if(i == max_index)
+            animations.at(i)->startAnimationOnCopy(new_rect, true);
+        else
+            animations.at(i)->startAnimationOnCopy(new_rect, false);
+    }
 }
 
-
 //=========================================================================================================
-void LineItem::setStrokeLineCap(Qt::PenCapStyle capStyle)
+void LineItem::stopAnimations()
 {
-    currentPen.setCapStyle(capStyle);
+    for(auto &a : animations)
+        a->stopSlot();
 }
 
 //=========================================================================================================
-void LineItem::setStrokeLineJoin(Qt::PenJoinStyle joinStyle)
+void LineItem::startAnimation(AnimateTag *a)
 {
-    currentPen.setJoinStyle(joinStyle);
-}
+    auto new_rect = this->copy(true);
 
-//=========================================================================================================
-void LineItem::setStrokeDashoffset(qreal offset)
-{
-    if(offset >= 0)
-        currentPen.setDashOffset(offset);
-}
+    //делаем полупрозрачной анимацию
+    auto pen = new_rect->getPen();
+    auto pen_color = pen.color();
+    pen_color.setAlpha(pen_color.alpha()/2);
+    pen.setColor(pen_color);
+    new_rect->setPen(pen);
 
-//=========================================================================================================
-void LineItem::setStrokeDasharray(const QVector<qreal> &pattern)
-{
-    if(!pattern.empty())
-        currentPen.setDashPattern(pattern);
+    this->scene()->addItem(new_rect);
+    a->startAnimationOnCopy(new_rect, true);
 }
 
 //=========================================================================================================
@@ -156,7 +205,8 @@ void LineItem::cornerMove(GrabbingCorner *owner, qreal dx, qreal dy)
     prepareGeometryChange();
     setLine(line);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 
     emit x1ChangedSignal(line.p1().x());
     emit y1ChangedSignal(line.p1().y());
@@ -171,7 +221,8 @@ void LineItem::x1Changed(int v)
     line.setP1(QPointF(v,line.p1().y()));
     this->setLine(line);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 
     qDebug() << "LINE_CHANGED";
 }
@@ -183,7 +234,8 @@ void LineItem::y1Changed(int v)
     line.setP1(QPointF(line.p1().x(),v));
     this->setLine(line);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 
     qDebug() << "LINE_CHANGED";
 }
@@ -195,7 +247,8 @@ void LineItem::x2Changed(int v)
     line.setP2(QPointF(v,line.p2().y()));
     this->setLine(line);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 
     qDebug() << "LINE_CHANGED";
 }
@@ -207,7 +260,8 @@ void LineItem::y2Changed(int v)
     line.setP2(QPointF(line.p2().x(),v));
     this->setLine(line);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 
     qDebug() << "LINE_CHANGED";
 }
@@ -224,7 +278,8 @@ void LineItem::strokeWidthChanged(int w)
 {
     currentPen.setWidth(w);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 //=========================================================================================================

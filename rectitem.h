@@ -41,8 +41,8 @@ public:
     };
 
 public:
-    RectItem(const QRectF &rect);
-    RectItem* copy(); ////////не работает верно!
+    RectItem(const QRectF &rect, bool animationItem = false);
+    RectItem* copy(bool animationItem = false); ////////не работает верно!
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QPen getPen();
