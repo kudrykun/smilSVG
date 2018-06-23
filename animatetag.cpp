@@ -6,13 +6,13 @@ int AnimateTag::ID = 0;
 //=========================================================================================================
 AnimateTag::AnimateTag(QObject *parent) : QPropertyAnimation(parent), currentID(ID++)
 {
-    name = name + " " + QString::number(currentID);
+    name = QString::fromUtf8(propertyName()) + " " + name + " " + QString::number(currentID);
 }
 
 //=========================================================================================================
 AnimateTag::AnimateTag(QObject *target, const QByteArray &propertyName, QObject *parent) : QPropertyAnimation(target, propertyName,parent), currentID(ID++)
 {
-    name = name + " " + QString::number(currentID);
+    name = QString::fromUtf8(propertyName) + " " +name + " " + QString::number(currentID);
 }
 
 //=========================================================================================================
@@ -48,4 +48,14 @@ void AnimateTag::changedTo(QVariant v)
 {
     this->setEndValue(v);
     qDebug() << "endValue " << this->endValue();
+}
+
+void AnimateTag::startSlot()
+{
+    this->start();
+}
+
+void AnimateTag::stopSlot()
+{
+    this->stop();
 }

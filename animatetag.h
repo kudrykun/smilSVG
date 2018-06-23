@@ -31,6 +31,9 @@ public slots:
     void changedFrom(QVariant v);
     void changedTo(QVariant v);
 
+    void startSlot();
+    void stopSlot();
+
 private:
    static int ID;
    const int currentID;

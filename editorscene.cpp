@@ -38,11 +38,61 @@ EditorScene::EditorScene(QObject *parent) : QGraphicsScene(parent)
 //    QPropertyAnimation *animation = new QPropertyAnimation(rect, "x");
 //    animation->setDuration(1000);
 //    animation->setLoopCount(10);
-//    QRectF r = rect->rect();
 //    animation->setStartValue(0);
 //    animation->setEndValue(1000);
 
 //    animation->start();
+
+//    QPropertyAnimation *animation1 = new QPropertyAnimation(rect, "y");
+//    animation1->setDuration(1000);
+//    animation1->setLoopCount(10);
+//    animation1->setStartValue(0);
+//    animation1->setEndValue(1000);
+
+//    animation1->start();
+
+//    QPropertyAnimation *animation2 = new QPropertyAnimation(rect, "fillColor");
+//    animation2->setDuration(1000);
+//    animation2->setLoopCount(10);
+//    animation2->setStartValue(QColor(Qt::red));
+//    animation2->setEndValue(QColor(Qt::green));
+
+//    animation2->start();
+
+//    QPropertyAnimation *animation3 = new QPropertyAnimation(rect, "strokeColor");
+//    animation3->setDuration(1000);
+//    animation3->setLoopCount(10);
+//    animation3->setStartValue(QColor(Qt::blue));
+//    animation3->setEndValue(QColor(Qt::yellow));
+
+//    animation3->start();
+
+//    QPropertyAnimation *animation4 = new QPropertyAnimation(rect, "strokeWidth");
+//    animation4->setDuration(1000);
+//    animation4->setLoopCount(10);
+//    animation4->setStartValue(1);
+//    animation4->setEndValue(30);
+
+//    animation4->start();
+
+
+//    QPropertyAnimation *animation5 = new QPropertyAnimation(rect, "w");
+//    animation5->setDuration(1000);
+//    animation5->setLoopCount(10);
+//    animation5->setStartValue(300);
+//    animation5->setEndValue(600);
+
+//    animation5->start();
+
+
+//    QPropertyAnimation *animation6 = new QPropertyAnimation(rect, "h");
+//    animation6->setDuration(1000);
+//    animation6->setLoopCount(10);
+//    animation6->setStartValue(400);
+//    animation6->setEndValue(200);
+
+//    animation6->start();
+
     //this->drawTestFigures();
 }
 

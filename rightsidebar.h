@@ -9,6 +9,7 @@
 #include "lineitem.h"
 #include <QToolBox>
 #include "animatetag.h"
+#include <QPushButton>
 
 class RightSideBar : public QToolBar
 {
@@ -32,9 +33,24 @@ signals:
     void setStrokeOpacitySignal(int v);
     void setFillOpacitySignal(int v);
 
+    void animateFromColorChanged(QVariant v);
+    void animateToColorChanged(QVariant v);
+
+    void changeToBtnColorSignal(QPushButton* b, QColor c);
+    void changeFromBtnColorSignal(QPushButton* b, QColor c);
+
+
 public slots:
+    void  deleteAnimationSlot();
+
     void itemStrokeColorEdited();
+    void animateFromColorEdited();
+    void animateToColorEdited();
     void itemFillColorEdited();
+
+    void changeFromBtnColorSlot(QPushButton *b,QColor c);
+    void changeToBtnColorSlot(QPushButton *b,QColor c);
+
 
     void itemStrokeOpacityEdited(int v);
     void itemFillOpacityEdited(int v);
@@ -51,6 +67,7 @@ public slots:
     void itemHEdited(int v);
 
     void addAnimationToItemSlot();
+    void changedAttributeName(QString name);
 
 private:
     void setupPositionPropBox(ShowMode mode);
@@ -87,6 +104,8 @@ private:
     QColor item_fill_color = QColor(255,0,0);
 
     QToolBox *toolBox;
+
+    QString global_attr_name;
 };
 
 #endif // RIGHTSIDEBAR_H

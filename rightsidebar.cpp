@@ -28,8 +28,8 @@ RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(pare
 
                 item_w = new_item->rect().width();
                 item_h = new_item->rect().height();
-                item_rx = new_item->getRx();
-                item_ry = new_item->getRy();
+                item_rx = new_item->getItem_rx();
+                item_ry = new_item->getItem_ry();
                 item_stroke_w = new_item->getPen().width();
                 item_stroke_color = new_item->getPen().color();
                 item_fill_color = new_item->getBrush().color();
@@ -86,6 +86,27 @@ RightSideBar::RightSideBar(QGraphicsItem *item, QWidget *parent) : QToolBar(pare
     animationsPropTemp = this->addWidget(animationsProp);
 }
 
+void RightSideBar::deleteAnimationSlot()
+{
+    qDebug() << "DELETE SLOT";
+    auto btn = dynamic_cast<QPushButton*>(QObject::sender());
+    if(rect_item != nullptr)
+    {
+        //rect_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer"));
+        rect_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer").value<void *>());
+        if(toolBox != nullptr)
+        {
+            auto widget = (QWidget *) btn->property("anim_widget_pointer").value<void *>();
+            toolBox->removeItem(toolBox->indexOf(widget));
+        }
+    }
+    //delete_anim->setProperty("animation_pointer", qVariantFromValue((void *) a));
+    //delete_anim->setProperty("anim_widget_pointer", qVariantFromValue((void *) this));
+    /*QVariant v = qVariantFromValue((void *) yourPointerHere);
+
+yourPointer = (YourClass *) v.value<void *>();*/
+}
+
 //=========================================================================================================
 void RightSideBar::itemStrokeColorEdited()
 {
@@ -110,6 +131,28 @@ void RightSideBar::itemStrokeColorEdited()
     }
 }
 
+void RightSideBar::animateFromColorEdited()
+{
+    const QColor color = QColorDialog::getColor(item_stroke_color, this, "Select stroke color");
+    if (color.isValid()) {
+        item_stroke_color = color;
+        QVariant variant = color;
+        emit animateFromColorChanged(variant);
+        emit changeFromBtnColorSignal(dynamic_cast<QPushButton*>(QObject::sender()),color);
+    }
+}
+
+void RightSideBar::animateToColorEdited()
+{
+    const QColor color = QColorDialog::getColor(item_stroke_color, this, "Select stroke color");
+    if (color.isValid()) {
+        item_stroke_color = color;
+        QVariant variant = color;
+        emit animateToColorChanged(variant);
+        emit changeToBtnColorSignal(dynamic_cast<QPushButton*>(QObject::sender()),color);
+    }
+}
+
 //=========================================================================================================
 void RightSideBar::itemFillColorEdited()
 {
@@ -129,6 +172,18 @@ void RightSideBar::itemFillColorEdited()
         if(ellipse_item != nullptr)
             ellipse_item->fillColorChanged(color);
     }
+}
+
+//=========================================================================================================
+void RightSideBar::changeFromBtnColorSlot(QPushButton *b, QColor c)
+{
+    b->setStyleSheet("background-color: " + c.name());
+}
+
+//=========================================================================================================
+void RightSideBar::changeToBtnColorSlot(QPushButton *b, QColor c)
+{
+    b->setStyleSheet("background-color: " + c.name());
 }
 
 //=========================================================================================================
@@ -268,12 +323,17 @@ void RightSideBar::itemHEdited(int v)
 void RightSideBar::addAnimationToItemSlot()
 {
     if(rect_item != nullptr){
-        rect_item->addAnimation();
+        rect_item->addAnimation(global_attr_name);
         auto animation = rect_item->getAnimations().last();
         auto widget = createAnimWidget(animation);
         toolBox->addItem(widget, animation->getName());
         toolBox->setCurrentWidget(widget);
     }
+}
+
+void RightSideBar::changedAttributeName(QString name)
+{
+    global_attr_name = name;
 }
 
 //=========================================================================================================
@@ -656,29 +716,64 @@ void RightSideBar::setupAppearencePropBox(RightSideBar::ShowMode mode)
 }
 
 
+//=========================================================================================================
 void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
 {
+    //удаляем если что
     if(animationsProp != nullptr && animationsPropTemp != nullptr){
         this->removeAction(animationsPropTemp);
         animationsProp = nullptr;
         animationsPropTemp = nullptr;
     }
 
+    //контейнер в тулблоксе
     animationsProp = new QGroupBox("Animations", this);
     animationsProp->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed));
 
+    // лейаут для содержимого
     QVBoxLayout *layout = new QVBoxLayout;
 
-    QPushButton *add_anim_btn = new QPushButton("Add animation");
-    layout->addWidget(add_anim_btn);
+    //кнопка добавить анимацию с выбором типа добавляемой анимации
+    {
+        //ПРИНЦИП при нажатии на кнопку добавляется анимация типа из глобальной переменной global_attr_name
+        QHBoxLayout *l = new QHBoxLayout;
+        QPushButton *add_anim_btn = new QPushButton("Add animation");
+        connect(add_anim_btn, &QAbstractButton::released, this, addAnimationToItemSlot);
+        l->addWidget(add_anim_btn);
+
+        QComboBox *box = new QComboBox;
+        if(rect_item != nullptr)
+            box->addItems(rect_item->getAnimAttrNames());
+        //box->setCurrentText(QString::fromUtf8(a->propertyName()));
+        global_attr_name = box->currentText();
+        connect(box, SIGNAL(currentTextChanged(QString)), this, SLOT(changedAttributeName(QString)));
+        l->addWidget(box);
+
+        layout->addLayout(l);
+    }
+
+    //кнопка проигрывающая все анимации
+    {
+        QPushButton *play_all_anim_btn = new QPushButton("Play animations");
+        if(rect_item != nullptr)
+            connect(play_all_anim_btn, &QAbstractButton::released, rect_item, RectItem::playAnimations);
+        layout->addWidget(play_all_anim_btn);
+    }
+
+    //кнопка останавливающая все анимации
+    {
+        QPushButton *stop_all_anim_btn = new QPushButton("Stop animations");
+        if(rect_item != nullptr)
+        connect(stop_all_anim_btn, &QAbstractButton::released, rect_item, RectItem::stopAnimations);
+        layout->addWidget(stop_all_anim_btn);
+    }
 
     animationsProp->setLayout(layout);
 
     toolBox = new QToolBox;
     layout->addWidget(toolBox);
 
-    connect(add_anim_btn, &QAbstractButton::clicked, this, addAnimationToItemSlot);
-
+    //ну и добавляем имеющиеся анимации
     if(mode == Rect)
     {
         for(auto animation : rect_item->getAnimations())
@@ -686,50 +781,100 @@ void RightSideBar::setupAnimationPropBox(RightSideBar::ShowMode mode)
     }
 }
 
-
+//=========================================================================================================
 QWidget *RightSideBar::createAnimWidget(AnimateTag *a)
 {
-    QWidget *anim_widget = new QWidget(); //контейнер для содержимоо вкладки
+    QWidget *anim_widget = new QWidget(); //контейнер для содержимого вкладки
+
+    //лейаут для содержимого вкладки
     QVBoxLayout *anim_layout = new QVBoxLayout(anim_widget);
     anim_widget->setLayout(anim_layout);
 
-    //Attribute name combobox
+    //массив с кнопками установки и удаления и проигрывания
+    {
+        QHBoxLayout *l = new QHBoxLayout;
+
+        //кнопка проигрывания текущей анимации
+        QPushButton *play_anim_btn = new QPushButton("Play");
+        connect(play_anim_btn, &QAbstractButton::released, a, &AnimateTag::startSlot);
+        l->addWidget(play_anim_btn);
+
+        //кнопка проигрывания текущей анимации
+        QPushButton *stop_anim_btn = new QPushButton("Stop");
+        connect(stop_anim_btn, &QAbstractButton::released, a, &AnimateTag::stopSlot);
+        l->addWidget(stop_anim_btn);
+
+        //кнопка проигрывания текущей анимации
+        QPushButton *delete_anim = new QPushButton("Delete");
+        delete_anim->setProperty("animation_pointer", qVariantFromValue((void *) a));
+        delete_anim->setProperty("anim_widget_pointer", qVariantFromValue((void *) anim_widget));
+        /*QVariant v = qVariantFromValue((void *) yourPointerHere);
+
+yourPointer = (YourClass *) v.value<void *>();*/
+        connect(delete_anim, &QAbstractButton::released, this, &RightSideBar::deleteAnimationSlot);
+        l->addWidget(delete_anim);
+
+        anim_layout->addLayout(l);
+    }
+    //просто лейбл с типом анимации
     {
         QHBoxLayout *layout = new QHBoxLayout;
 
-        QLabel *lbl = new QLabel("Attribute name");
+        QLabel *lbl = new QLabel("Attribute name: " + QString::fromUtf8(a->propertyName()));
         layout->addWidget(lbl);
-
-        QComboBox *box = new QComboBox;
-        if(rect_item != nullptr)
-            box->addItems(rect_item->getAnimAttrNames());
-        box->setCurrentIndex(0);
-        connect(box, SIGNAL(currentTextChanged(QString)), a, SLOT(changedAttributeName(QString)));
-        layout->addWidget(box);
 
         anim_layout->addLayout(layout);
     }
 
-    //from and to
+    //параметры from and to
     {
+        QString name = QString::fromUtf8(a->propertyName());
+
         QHBoxLayout *layout = new QHBoxLayout;
 
         QLabel *f_lbl = new QLabel("From");
         layout->addWidget(f_lbl);
 
-        QSpinBox *f_edit = new QSpinBox();
-        f_edit->setRange(0, 10000);
-        f_edit->setValue(0);
-        connect(f_edit, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), a, &AnimateTag::changedFrom);
-        layout->addWidget(f_edit);
+        if(name == "strokeColor" || name == "fillColor")
+        {
+
+            QPushButton *stroke_color = new QPushButton();
+            stroke_color->setStyleSheet("background-color: " + a->startValue().value<QColor>().name());
+            connect(stroke_color, &QAbstractButton::clicked, this, animateFromColorEdited);
+            connect(this, SIGNAL(animateFromColorChanged(QVariant)), a, SLOT(changedFrom(QVariant)));
+            connect(this, SIGNAL(changeFromBtnColorSignal(QPushButton*,QColor)), this, SLOT(changeFromBtnColorSlot(QPushButton*,QColor)));
+            layout->addWidget(stroke_color);
+        }
+        else
+        {
+            QSpinBox *f_edit = new QSpinBox();
+            f_edit->setRange(0, 10000);
+            f_edit->setValue(a->startValue().toInt());
+            connect(f_edit, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), a, &AnimateTag::changedFrom);
+            layout->addWidget(f_edit);
+        }
 
         QLabel *t_lbl = new QLabel("To");
         layout->addWidget(t_lbl);
 
-        QSpinBox *t_edit = new QSpinBox();
-        t_edit->setRange(0, 10000);
-        t_edit->setValue(0);
-        layout->addWidget(t_edit);
+        if(name == "strokeColor" || name == "fillColor")
+        {
+
+            QPushButton *fill_color = new QPushButton();
+            fill_color->setStyleSheet("background-color: " + a->endValue().value<QColor>().name());
+            connect(fill_color, &QAbstractButton::clicked, this, animateToColorEdited);
+            connect(this, SIGNAL(animateToColorChanged(QVariant)), a, SLOT(changedTo(QVariant)));
+            connect(this, SIGNAL(changeToBtnColorSignal(QPushButton*,QColor)), this, SLOT(changeToBtnColorSlot(QPushButton*,QColor)));
+            layout->addWidget(fill_color);
+        }
+        else
+        {
+            QSpinBox *t_edit = new QSpinBox();
+            t_edit->setRange(0, 10000);
+            t_edit->setValue(a->endValue().toInt());
+            connect(t_edit, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), a, &AnimateTag::changedTo);
+            layout->addWidget(t_edit);
+        }
 
         anim_layout->addLayout(layout);
     }
@@ -743,7 +888,8 @@ QWidget *RightSideBar::createAnimWidget(AnimateTag *a)
 
         QSpinBox *edit = new QSpinBox();
         edit->setRange(0, 10000);
-        edit->setValue(0);
+        edit->setValue(a->duration());
+        connect(edit, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), a, &AnimateTag::changedDuration);
         layout->addWidget(edit);
 
         anim_layout->addLayout(layout);
@@ -758,7 +904,8 @@ QWidget *RightSideBar::createAnimWidget(AnimateTag *a)
 
         QSpinBox *edit = new QSpinBox();
         edit->setRange(0, 10000);
-        edit->setValue(0);
+        edit->setValue(a->loopCount());
+        connect(edit, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), a, &AnimateTag::changedRepeatCount);
         layout->addWidget(edit);
 
         anim_layout->addLayout(layout);

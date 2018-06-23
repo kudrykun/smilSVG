@@ -15,6 +15,16 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
     setAcceptHoverEvents(true);
     current_corner = 0;
     connect(this, SIGNAL(animationXChangedSignal(int)),this, SLOT(xChanged(int)));
+    connect(this, SIGNAL(animationYChangedSignal(int)),this, SLOT(yChanged(int)));
+    connect(this, SIGNAL(animationWChangedSignal(int)),this, SLOT(wChanged(int)));
+    connect(this, SIGNAL(animationHChangedSignal(int)),this, SLOT(hChanged(int)));
+    connect(this, SIGNAL(animationRXChangedSignal(int)),this, SLOT(rxChanged(int)));
+    connect(this, SIGNAL(animationRYChangedSignal(int)),this, SLOT(ryChanged(int)));
+    connect(this, SIGNAL(animationStrokeColorChangedSignal(QColor)),this, SLOT(strokeColorChanged(QColor)));
+    connect(this, SIGNAL(animationFillColorChangedSignal(QColor)),this, SLOT(fillColorChanged(QColor)));
+    //connect(this, SIGNAL(animationStrokeOpacityChangedSignal(int)),this, SLOT(strokeColorChanged(QColor)));
+    //connect(this, SIGNAL(animationFillOpacityChangedSignal(int)),this, SLOT(fillColorChanged(QColor)));
+    connect(this, SIGNAL(animationStrokeWidthChangedSignal(int)),this, SLOT(strokeWidthChanged(int)));
 
     for(int i = 0; i < 4; i++){
 
@@ -39,6 +49,7 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
         animAttributesNames.push_back("strokeOpacity");
         animAttributesNames.push_back("fillColor");
         animAttributesNames.push_back("fillOpacity");
+        animAttributesNames.push_back("strokeWidth");
         animAttributesNames.push_back("rx");
         animAttributesNames.push_back("ry");
     }
@@ -73,7 +84,7 @@ void RectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     painter->setBrush(currentBrush);
     painter->setPen(currentPen);
-    painter->drawRoundedRect(re,rx,ry);
+    painter->drawRoundedRect(re,item_rx,item_ry);
 
     if(isSelected())
     {
@@ -112,15 +123,43 @@ QBrush RectItem::getBrush()
 }
 
 //=========================================================================================================
-void RectItem::addAnimation()
+void RectItem::addAnimation(QString name)
 {
-    AnimateTag *animation = new AnimateTag(this, "x");
+    AnimateTag *animation = new AnimateTag(this, name.toUtf8());
     animation->setDuration(1000);
-    animation->setLoopCount(10);
-    animation->setStartValue(0);
-    animation->setEndValue(1000);
+    animation->setLoopCount(1);
+    if(name == "strokeColor" || name == "fillColor")
+    {
+        animation->setStartValue(QColor(255,255,255));
+        animation->setEndValue(QColor(255,255,255));
+    }
+    else
+    {
+        animation->setStartValue(100);
+        animation->setEndValue(1000);
+    }
 
     animations.push_back(animation);
+}
+
+//=========================================================================================================
+void RectItem::deleteAnimation(AnimateTag *a)
+{
+    animations.removeOne(a);
+}
+
+//=========================================================================================================
+void RectItem::playAnimations()
+{
+    for(auto &a : animations)
+        a->start();
+}
+
+//=========================================================================================================
+void RectItem::stopAnimations()
+{
+    for(auto &a : animations)
+        a->stop();
 }
 
 //=========================================================================================================
@@ -255,7 +294,8 @@ void RectItem::wChanged(int v)
     rect.setWidth(v);
     this->setRect(rect);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 void RectItem::hChanged(int v)
@@ -265,7 +305,8 @@ void RectItem::hChanged(int v)
     rect.setHeight(v);
     this->setRect(rect);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 void RectItem::strokeColorChanged(QColor c)
@@ -277,6 +318,7 @@ void RectItem::strokeColorChanged(QColor c)
 void RectItem::fillColorChanged(QColor c)
 {
     currentBrush.setColor(c);
+    qDebug() << c;
     update();
 }
 
@@ -284,13 +326,14 @@ void RectItem::strokeWidthChanged(int w)
 {
     currentPen.setWidth(w);
     update();
-    updateCornersPosition();
+    if(!animation_item)
+        updateCornersPosition();
 }
 
 void RectItem::cornerRadChanged(int rx, int ry)
 {
-    this->rx = rx;
-    this->ry = ry;
+    this->item_rx = rx;
+    this->item_ry = ry;
     update();
 }
 
@@ -428,4 +471,24 @@ QVariant RectItem::itemChange(RectItem::GraphicsItemChange change, const QVarian
             removeGrabbers();
     }
     return QGraphicsItem::itemChange(change, value);
+}
+
+int RectItem::getItem_ry() const
+{
+    return item_ry;
+}
+
+void RectItem::setItem_ry(int value)
+{
+    item_ry = value;
+}
+
+int RectItem::getItem_rx() const
+{
+    return item_rx;
+}
+
+void RectItem::setItem_rx(int value)
+{
+    item_rx = value;
 }
