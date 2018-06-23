@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QPropertyAnimation>
+#include <QGraphicsItem>
 
 class AnimateTag : public QPropertyAnimation
 {
@@ -31,13 +32,22 @@ public slots:
     void changedFrom(QVariant v);
     void changedTo(QVariant v);
 
+    //слотовые обертки для одноименных функций
     void startSlot();
     void stopSlot();
+
+    void startAnimationOnCopy(QGraphicsItem* i); //задает новый временный объект для анимации и запускает ее
+    void restoreTargetObject(); //восстанавливает исходный объект
+
 
 private:
    static int ID;
    const int currentID;
    QString name = "Animation";
+   QGraphicsItem *origin_target = nullptr;
+//   RectItem *origin_rect = nullptr;
+//   EllipseItem *origin_ellipse = nullptr;
+//   LineItem *origin_line = nullptr;
 };
 
 

@@ -41,7 +41,8 @@ signals:
 
 
 public slots:
-    void  deleteAnimationSlot();
+    void deleteAnimationSlot();
+    void startAnimationSlot();
 
     void itemStrokeColorEdited();
     void animateFromColorEdited();

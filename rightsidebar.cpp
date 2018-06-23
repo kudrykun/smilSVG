@@ -92,7 +92,6 @@ void RightSideBar::deleteAnimationSlot()
     auto btn = dynamic_cast<QPushButton*>(QObject::sender());
     if(rect_item != nullptr)
     {
-        //rect_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer"));
         rect_item->deleteAnimation((AnimateTag *) btn->property("animation_pointer").value<void *>());
         if(toolBox != nullptr)
         {
@@ -100,11 +99,16 @@ void RightSideBar::deleteAnimationSlot()
             toolBox->removeItem(toolBox->indexOf(widget));
         }
     }
-    //delete_anim->setProperty("animation_pointer", qVariantFromValue((void *) a));
-    //delete_anim->setProperty("anim_widget_pointer", qVariantFromValue((void *) this));
-    /*QVariant v = qVariantFromValue((void *) yourPointerHere);
+}
 
-yourPointer = (YourClass *) v.value<void *>();*/
+void RightSideBar::startAnimationSlot()
+{
+    qDebug() << "PLAY SLOT";
+    auto btn = dynamic_cast<QPushButton*>(QObject::sender());
+    if(rect_item != nullptr)
+    {
+        rect_item->startAnimation((AnimateTag *) btn->property("play_animation_pointer").value<void *>());
+    }
 }
 
 //=========================================================================================================
@@ -796,7 +800,8 @@ QWidget *RightSideBar::createAnimWidget(AnimateTag *a)
 
         //кнопка проигрывания текущей анимации
         QPushButton *play_anim_btn = new QPushButton("Play");
-        connect(play_anim_btn, &QAbstractButton::released, a, &AnimateTag::startSlot);
+        play_anim_btn->setProperty("play_animation_pointer", qVariantFromValue((void *) a));
+        connect(play_anim_btn, &QAbstractButton::released, this, &RightSideBar::startAnimationSlot);
         l->addWidget(play_anim_btn);
 
         //кнопка проигрывания текущей анимации

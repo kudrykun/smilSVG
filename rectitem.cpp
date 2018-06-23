@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QCursor>
+#include "editorscene.h"
 
 //=========================================================================================================
 RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
@@ -26,18 +27,18 @@ RectItem::RectItem(const QRectF &rect) : QGraphicsRectItem(rect)
     //connect(this, SIGNAL(animationFillOpacityChangedSignal(int)),this, SLOT(fillColorChanged(QColor)));
     connect(this, SIGNAL(animationStrokeWidthChangedSignal(int)),this, SLOT(strokeWidthChanged(int)));
 
-    for(int i = 0; i < 4; i++){
+//    for(int i = 0; i < 4; i++){
 
-        AnimateTag *animation = new AnimateTag(this, "x");
-        animation->setDuration(1000);
-        animation->setLoopCount(10);
-        animation->setStartValue(0);
-        animation->setEndValue(1000);
+//        AnimateTag *animation = new AnimateTag(this, "x");
+//        animation->setDuration(1000);
+//        animation->setLoopCount(10);
+//        animation->setStartValue(0);
+//        animation->setEndValue(1000);
 
-        //animation->start();
+//        //animation->start();
 
-        animations.push_back(animation);
-    }
+//        animations.push_back(animation);
+//    }
 
     //Задаем доступные attrname для этой фигуры
     {
@@ -63,6 +64,8 @@ RectItem *RectItem::copy()
     newItem->setPen(this->getPen());
     newItem->setBrush(this->getBrush());
     newItem->setPos(this->pos());
+    newItem->setItem_rx(item_rx);
+    newItem->setItem_ry(item_ry);
     return newItem;
 }
 
@@ -160,6 +163,27 @@ void RectItem::stopAnimations()
 {
     for(auto &a : animations)
         a->stop();
+}
+
+void RectItem::startAnimation(AnimateTag *a)
+{
+    auto new_rect = this->copy();
+
+    //делаем полупрозрачной анимацию
+    auto pen = new_rect->getPen();
+    auto pen_color = pen.color();
+    pen_color.setAlpha(pen_color.alpha()/2);
+    pen.setColor(pen_color);
+    new_rect->setPen(pen);
+
+    auto brush = new_rect->getBrush();
+    auto brush_color = brush.color();
+    brush_color.setAlpha(brush_color.alpha()/2);
+    brush.setColor(brush_color);
+    new_rect->setBrush(brush);
+
+    this->scene()->addItem(new_rect);
+    a->startAnimationOnCopy(new_rect);
 }
 
 //=========================================================================================================

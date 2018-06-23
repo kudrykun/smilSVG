@@ -42,17 +42,20 @@ public:
 
 public:
     RectItem(const QRectF &rect);
-    RectItem* copy();
+    RectItem* copy(); ////////не работает верно!
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QPen getPen();
     QBrush getBrush();
+    void setPen(QPen v) {currentPen = v;}
+    void setBrush(QBrush v) {currentBrush = v;}
 
 
     QList<AnimateTag*> getAnimations() {return animations;}
     void addAnimation(QString name);
     void deleteAnimation(AnimateTag* a);
     QStringList getAnimAttrNames() {return animAttributesNames;}
+
     int getItem_rx() const;
     void setItem_rx(int value);
 
@@ -139,6 +142,7 @@ public slots:
     void playAnimations();
     void stopAnimations();
 
+    void startAnimation(AnimateTag* a);
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *ev) override;
