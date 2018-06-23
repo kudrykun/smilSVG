@@ -16,8 +16,7 @@ AnimateTag::AnimateTag(QObject *parent) : QPropertyAnimation(parent), currentID(
 //=========================================================================================================
 AnimateTag::AnimateTag(QObject *target, const QByteArray &propertyName, QObject *parent) : QPropertyAnimation(target, propertyName,parent), currentID(ID++)
 {
-    name = QString::fromUtf8(propertyName) + " " +name + " " + QString::number(currentID);
-    connect(this, SIGNAL(finished()), this, SLOT(restoreTargetObject()));
+    name = QString::fromUtf8(propertyName) + " " + name + " " + QString::number(currentID);
 }
 
 //=========================================================================================================
@@ -68,12 +67,16 @@ void AnimateTag::stopSlot()
 }
 
 //=========================================================================================================
-void AnimateTag::startAnimationOnCopy(QGraphicsItem *i)
+void AnimateTag::startAnimationOnCopy(QGraphicsItem *i, bool with_destroying)
 {
     {
         RectItem* item = dynamic_cast<RectItem*>(i);
         if(item != nullptr)
         {
+            if(with_destroying)
+                connect(this, SIGNAL(finished()), this, SLOT(restoreTargetObjectWithDestroy()));
+            else
+                connect(this, SIGNAL(finished()), this, SLOT(restoreTargetObject()));
             origin_target = dynamic_cast<QGraphicsItem*>(this->targetObject());
             this->setTargetObject(item);
             this->start();
@@ -90,12 +93,29 @@ void AnimateTag::restoreTargetObject()
         RectItem* item = dynamic_cast<RectItem*>(origin_target);
         if(item != 0)
         {
+            disconnect(this, SIGNAL(finished()), this, SLOT(restoreTargetObject()));
+            auto temp_target = dynamic_cast<RectItem*>(this->targetObject());
+            this->setTargetObject(item);
+            qDebug() << "ORIGIN RESTORED";
+        }
+
+        origin_target = nullptr;
+    }
+}
+
+void AnimateTag::restoreTargetObjectWithDestroy()
+{
+    if(origin_target != nullptr)
+    {
+        RectItem* item = dynamic_cast<RectItem*>(origin_target);
+        if(item != 0)
+        {
+            disconnect(this, SIGNAL(finished()), this, SLOT(restoreTargetObjectWithDestroy()));
             auto temp_target = dynamic_cast<RectItem*>(this->targetObject());
             auto scene = origin_target->scene();
             scene->removeItem(temp_target);
-            delete temp_target;
             this->setTargetObject(item);
-            qDebug() << "ORIGIN RESTORED";
+            qDebug() << "ORIGIN RESTORED WITH DESTROY";
         }
 
         origin_target = nullptr;

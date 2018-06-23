@@ -36,8 +36,9 @@ public slots:
     void startSlot();
     void stopSlot();
 
-    void startAnimationOnCopy(QGraphicsItem* i); //задает новый временный объект для анимации и запускает ее
+    void startAnimationOnCopy(QGraphicsItem* i, bool with_destroying = false); //задает новый временный объект для анимации и запускает ее
     void restoreTargetObject(); //восстанавливает исходный объект
+    void restoreTargetObjectWithDestroy(); //восстанавливает исходный объект
 
 
 private:

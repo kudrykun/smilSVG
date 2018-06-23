@@ -154,8 +154,41 @@ void RectItem::deleteAnimation(AnimateTag *a)
 //=========================================================================================================
 void RectItem::playAnimations()
 {
-    for(auto &a : animations)
-        a->start();
+    int max = 0;
+    int max_index = 0;
+    for(int i = 0; i < animations.size(); i++)
+    {
+        auto a = animations.at(i);
+        if(max <= a->duration()*a->loopCount()){
+            max = a->duration()*a->loopCount();
+            max_index = i;
+        }
+    }
+
+    auto new_rect = this->copy();
+
+    //делаем полупрозрачной анимацию
+    auto pen = new_rect->getPen();
+    auto pen_color = pen.color();
+    pen_color.setAlpha(pen_color.alpha()/2);
+    pen.setColor(pen_color);
+    new_rect->setPen(pen);
+
+    auto brush = new_rect->getBrush();
+    auto brush_color = brush.color();
+    brush_color.setAlpha(brush_color.alpha()/2);
+    brush.setColor(brush_color);
+    new_rect->setBrush(brush);
+
+    this->scene()->addItem(new_rect);
+
+    for(int i = 0; i < animations.size(); i++)
+    {
+        if(i == max_index)
+            animations.at(i)->startAnimationOnCopy(new_rect, true);
+        else
+            animations.at(i)->startAnimationOnCopy(new_rect, false);
+    }
 }
 
 //=========================================================================================================
@@ -165,6 +198,7 @@ void RectItem::stopAnimations()
         a->stop();
 }
 
+//=========================================================================================================
 void RectItem::startAnimation(AnimateTag *a)
 {
     auto new_rect = this->copy();
@@ -183,7 +217,7 @@ void RectItem::startAnimation(AnimateTag *a)
     new_rect->setBrush(brush);
 
     this->scene()->addItem(new_rect);
-    a->startAnimationOnCopy(new_rect);
+    a->startAnimationOnCopy(new_rect, true);
 }
 
 //=========================================================================================================
