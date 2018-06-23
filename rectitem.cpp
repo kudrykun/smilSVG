@@ -154,6 +154,7 @@ void RectItem::deleteAnimation(AnimateTag *a)
 //=========================================================================================================
 void RectItem::playAnimations()
 {
+    //короче, я создаю копию, на котой вопсроизводтся анимации, но копию удалаяютолько после завершения самой долгой анимации
     int max = 0;
     int max_index = 0;
     for(int i = 0; i < animations.size(); i++)
@@ -195,7 +196,7 @@ void RectItem::playAnimations()
 void RectItem::stopAnimations()
 {
     for(auto &a : animations)
-        a->stop();
+        a->stopSlot();
 }
 
 //=========================================================================================================

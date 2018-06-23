@@ -64,11 +64,27 @@ void AnimateTag::startSlot()
 void AnimateTag::stopSlot()
 {
     this->stop();
+    if(origin_target != nullptr)
+    {
+        RectItem* item = dynamic_cast<RectItem*>(origin_target);
+        if(item != 0)
+        {
+            disconnect(this, SIGNAL(finished()), this, SLOT(restoreTargetObjectWithDestroy()));
+            auto temp_target = dynamic_cast<RectItem*>(this->targetObject());
+            auto scene = origin_target->scene();
+            scene->removeItem(temp_target);
+            this->setTargetObject(item);
+            qDebug() << "ORIGIN RESTORED WITH DESTROY";
+        }
+
+        origin_target = nullptr;
+    }
 }
 
 //=========================================================================================================
 void AnimateTag::startAnimationOnCopy(QGraphicsItem *i, bool with_destroying)
 {
+    this->stopSlot();
     {
         RectItem* item = dynamic_cast<RectItem*>(i);
         if(item != nullptr)
