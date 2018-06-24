@@ -5,6 +5,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QGroupBox>
+#include <QFileDialog>
+#include "parsertohtml.h"
 
 //=========================================================================================================
 MainWindow::MainWindow(QWidget *parent) :
@@ -35,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->createEditionActionGroup();
     this->createItemsToolbar();
     this->createRightSideBar();
-    //this->createMenus();
+    this->createMenus();
 }
 
 //=========================================================================================================
@@ -75,6 +77,26 @@ void MainWindow::addEllipseActionToggled(bool)
     this->view->setItemToolState(EditorView::EllipseTool);
     QApplication::restoreOverrideCursor();
     QApplication::setOverrideCursor(Qt::CrossCursor);
+}
+
+
+void MainWindow::saveToFileSlot()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+            tr("Save to HTML file"), "",
+            tr("HTML file (*.html);;All Files (*)"));
+
+    if (fileName.isEmpty())
+            return;
+    else {
+        ParserToHtml *parser = new ParserToHtml(scene,fileName);
+        qDebug() << parser->getText();
+        QFile file(fileName);
+        if (file.open(QIODevice::ReadWrite)) {
+                QTextStream stream(&file);
+                stream << parser->getText() << endl;
+        }
+    }
 }
 
 //=========================================================================================================
@@ -132,6 +154,17 @@ void MainWindow::createItemsToolbar()
        itemBar->addAction(tool);
 
    this->addToolBar(Qt::LeftToolBarArea, itemBar);
+}
+
+//=========================================================================================================
+void MainWindow::createMenus()
+{
+    parseToAction = new QAction(tr("Parse to file"), this);
+    parseToAction->setStatusTip(tr("Create a new HTML document"));
+    connect(parseToAction, &QAction::triggered, this, &MainWindow::saveToFileSlot);
+
+    fileMenu = menuBar()->addMenu("File");
+    fileMenu->addAction(parseToAction);
 }
 
 //=========================================================================================================

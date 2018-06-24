@@ -35,7 +35,8 @@ SOURCES += \
     grouppingitem.cpp \
     lineitem.cpp \
     rightsidebar.cpp \
-    animatetag.cpp
+    animatetag.cpp \
+    parsertohtml.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS += \
     grouppingitem.h \
     lineitem.h \
     rightsidebar.h \
-    animatetag.h
+    animatetag.h \
+    parsertohtml.h
 
 FORMS += \
         mainwindow.ui

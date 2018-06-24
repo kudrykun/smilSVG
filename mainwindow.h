@@ -36,6 +36,7 @@ public slots:
     void addLineActionToggled(bool);
     void addRectActionToggled(bool);
     void addEllipseActionToggled(bool);
+    void saveToFileSlot();
 
 private:
     void createItemsActionGroup();
@@ -56,6 +57,7 @@ private:
 
     RightSideBar *rightBar = nullptr;
     QMenu *fileMenu = nullptr;
+    QAction *parseToAction = nullptr;
 };
 
 #endif // MAINWINDOW_H
